@@ -39,6 +39,9 @@ def api(needle='Python_(programming_language)'):
     pg_info = {'status': False}
 
     try:
+        # AWS XRay Metadata
+        xray_recorder.put_metadata('RESPONSE', resp)
+
         _wiki = wikipediaapi.Wikipedia('en')
         _wiki_page = _wiki.page(str(needle))
 
@@ -51,6 +54,11 @@ def api(needle='Python_(programming_language)'):
             pg_info['url'] = _wiki_page.fullurl
             pg_info['status'] = True
 
+            # AWS XRay Annotation
+            xray_recorder.put_annotation('BEGIN', pg_info)
+
+        # AWS XRay Metadata
+        xray_recorder.put_annotation('END', 'FLASK_APP')
     except Exception as e:
         print(str(e))
         pg_info['ERROR'] = str(e)
