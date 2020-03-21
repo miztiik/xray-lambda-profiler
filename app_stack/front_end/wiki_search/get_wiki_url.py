@@ -43,12 +43,12 @@ def api(needle='Python_(programming_language)'):
 
         if not _wiki_page.exists():
             print('Hell N0!')
-            pg_info['ERROR'] = f'No information available for \'{needle}\''
-
-        pg_info['title'] = _wiki_page.title
-        pg_info['summary'] = _wiki_page.summary[0:100]
-        pg_info['url'] = _wiki_page.fullurl
-        pg_info['status'] = True
+            pg_info['ERROR'] = f'No information available for \'{needle}\'. Be the first person to create a wiki page for this topic.'
+        else:
+            pg_info['title'] = _wiki_page.title
+            pg_info['summary'] = _wiki_page.summary[0:100]
+            pg_info['url'] = _wiki_page.fullurl
+            pg_info['status'] = True
 
     except Exception as e:
         print(str(e))
