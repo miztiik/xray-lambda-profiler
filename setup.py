@@ -9,17 +9,19 @@ setuptools.setup(
     name="xray_lambda_profiler",
     version="0.0.1",
 
-    description="An empty CDK Python app",
+    description="xray_lambda_profiler",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
-    author="author",
+    author="Mystique",
+    github_repo_url="https://github.com/miztiik/elasticache-for-app-performance",
+    github_profile="https://github.com/miztiik",
 
     package_dir={"": "xray_lambda_profiler"},
     packages=setuptools.find_packages(where="xray_lambda_profiler"),
 
     install_requires=[
-        "aws-cdk.core==1.29.0",
+        "aws-cdk.core==1.30.0",
     ],
 
     python_requires=">=3.6",

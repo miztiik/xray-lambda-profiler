@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>WikiWorld by Miztiik</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta name="author" content="Mystique">
+
+</head>
+
+<body>
+
+    <div>
+        <h1 align="center"> Wiki info related to {{_wiki_needle}}!</h1>
+
+        {% for key, value in _wiki_page_info.items() %}
+        {{ value.item }}
+        <div id="data-container">
+            <p> {{key}}:{{value}} </p>
+        </div>
+        {% endfor %}
+
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}
+            {% endif %}
+    </div>
+</body>
+
+</html>
