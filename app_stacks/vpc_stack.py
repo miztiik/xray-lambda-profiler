@@ -1,7 +1,16 @@
-
-
 from aws_cdk import aws_ec2 as _ec2
 from aws_cdk import core
+
+
+class global_args:
+    '''
+    Helper to define global statics
+    '''
+    OWNER = 'MystiqueAutomation'
+    ENVIRONMENT = 'production'
+    REPO_NAME = 'xray-lambda-profiler'
+    SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
+    VERSION = '2020_03_21'
 
 
 class VpcStack(core.Stack):
@@ -27,8 +36,12 @@ class VpcStack(core.Stack):
                 )
             ]
         )
-
-        core.CfnOutput(self,
-                       "VpcId",
-                       value=self.vpc.vpc_id,
-                       export_name="VpcId")
+        output_0 = core.CfnOutput(self,
+                                  "AutomationFrom",
+                                  value=f"{global_args.SOURCE_INFO}",
+                                  description="To know more about this automation stack, check out our github page."
+                                  )
+        output_1 = core.CfnOutput(self,
+                                  "VpcId",
+                                  value=self.vpc.vpc_id,
+                                  export_name="VpcId")

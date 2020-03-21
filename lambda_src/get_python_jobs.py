@@ -7,14 +7,16 @@
 .. contactauthor:: miztiik@github issues
 """
 
-# from aws_xray_sdk.core import patch_all
-from aws_xray_sdk.core import xray_recorder
-import time
-import requests
-# import boto3
-import os
 import json
 import logging
+# import boto3
+import os
+import random
+import time
+
+import requests
+# from aws_xray_sdk.core import patch_all
+from aws_xray_sdk.core import xray_recorder
 
 __author__ = 'Mystique'
 __email__ = 'miztiik@github'
@@ -28,7 +30,7 @@ class global_args:
     """
     OWNER = 'Mystique'
     ENVIRONMENT = 'production'
-    MODULE_NAME = 'get_video_metadata.py'
+    MODULE_NAME = 'get_python_jobs.py'
     LOG_LEVEL = logging.INFO
 
 
@@ -75,8 +77,8 @@ def _get_random_fox():
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f"ERROR:{str(e)}")
-        resp['error_message'] = str(e)
+        LOGGER.error(f'ERROR:{str(err)}')
+        resp['error_message'] = str(err)
     return resp
 
 
@@ -92,22 +94,26 @@ def _get_random_coder_quote():
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f"ERROR:{str(e)}")
-        resp['error_message'] = str(e)
+        LOGGER.error(f'ERROR:{str(err)}')
+        resp['error_message'] = str(err)
     return resp
 
 
 @xray_recorder.capture('_get_wiki_url')
 def _get_wiki_url(endpoint_url):
-    BASE_URL = f'{endpoint_url}/api/mystique'
+    BASE_URL = f'http://{endpoint_url}/api'
     payload = {}
     resp = {}
+    HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
+                  'pallavas', 'sangam_era', 'kural']
+
     try:
-        resp = requests.get(BASE_URL, params=payload)
+        resp = requests.get(
+            f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f"ERROR:{str(e)}")
-        resp['error_message'] = str(e)
+        LOGGER.error(f'ERROR:{str(err)}')
+        resp['error_message'] = str(err)
     return resp
 
 

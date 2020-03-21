@@ -1,4 +1,5 @@
 from aws_cdk import aws_ec2 as _ec2
+from aws_cdk import aws_iam as _iam
 from aws_cdk import core
 
 
@@ -8,7 +9,7 @@ class global_args:
     '''
     OWNER = 'MystiqueAutomation'
     ENVIRONMENT = 'production'
-    REPO_NAME = ''
+    REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
     VERSION = '2020_03_21'
 
@@ -50,20 +51,29 @@ class getWikiUrlStack(core.Stack):
                                        )
                                    ])
         # web_app_server Instance
-        web_app_server = _ec2.Instance(self,
-                                       "webAppServer",
-                                       instance_type=_ec2.InstanceType(
-                                           instance_type_identifier="t2.micro"),
-                                       instance_name="web_app_server",
-                                       machine_image=amzn_linux_ami,
-                                       vpc=vpc,
-                                       vpc_subnets=_ec2.SubnetSelection(
-                                           subnet_type=_ec2.SubnetType.PUBLIC
-                                       ),
-                                       role=_instance_role,
-                                       user_data=_ec2.UserData.custom(
-                                           user_data)
-                                       )
+        self.web_app_server = _ec2.Instance(self,
+                                            "webAppServer",
+                                            instance_type=_ec2.InstanceType(
+                                                instance_type_identifier="t2.micro"),
+                                            instance_name="web_app_server",
+                                            machine_image=amzn_linux_ami,
+                                            vpc=vpc,
+                                            vpc_subnets=_ec2.SubnetSelection(
+                                                subnet_type=_ec2.SubnetType.PUBLIC
+                                            ),
+                                            role=_instance_role,
+                                            user_data=_ec2.UserData.custom(
+                                                user_data)
+                                            )
+
+        # Allow Web Traffic to WebServer
+        self.web_app_server.connections.allow_from_any_ipv4(
+            _ec2.Port.tcp(80), description="Allow Web Traffic"
+        )
+
+        self.web_app_server.connections.allow_from_any_ipv4(
+            _ec2.Port.tcp(443), description="Allow Secured Web Traffic"
+        )
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
@@ -73,6 +83,6 @@ class getWikiUrlStack(core.Stack):
 
         output_1 = core.CfnOutput(self,
                                   "ApplicationServer",
-                                  value=f'http://{web_app_server.public_ip}/api/mystique',
+                                  value=f'http://{self.web_app_server.instance_public_ip}/api/mystique',
                                   description=f"This instance serves the wiki url for a given search keyword"
                                   )

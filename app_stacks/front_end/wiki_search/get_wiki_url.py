@@ -21,7 +21,7 @@ class global_args:
     '''
     OWNER = "MystiqueAutomation"
     ENVIRONMENT = "production"
-    REPO_NAME = ''
+    REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
     DEBUG_MODE = False
     RENDER_HTML = False
@@ -35,7 +35,8 @@ def index():
 @application.route('/api/<needle>')
 def api(needle='Python_(programming_language)'):
 
-    pg_info = {'status': False, }
+    # resp = {'statusCode': 404, }
+    pg_info = {}
 
     try:
         _wiki = wikipediaapi.Wikipedia('en')
@@ -52,6 +53,7 @@ def api(needle='Python_(programming_language)'):
 
     except Exception as e:
         print(str(e))
+        pg_info['status'] = False
         pg_info['ERROR'] = str(e)
 
     if global_args.RENDER_HTML:
@@ -60,8 +62,16 @@ def api(needle='Python_(programming_language)'):
                                _wiki_page_info=pg_info
                                )
     else:
-        return jsonify(pg_info)
+        # return jsonify(pg_info)
         # return pg_info
+
+        # Prep for API Gateway
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': pg_info
+            })
+        }
 
 
 if __name__ == '__main__':

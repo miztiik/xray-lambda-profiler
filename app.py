@@ -8,14 +8,14 @@ from app_stacks.get_wiki_url_stack import getWikiUrlStack
 
 app = core.App()
 # VPC Stack for hosting EC2 & Other resources
-vpc_stack = VpcStack(app, "get_wiki_url_stack_vpc_stack")
+vpc_stack = VpcStack(app, "get-wiki-url-stack-vpc-stack")
 
 # HTTP EndPoint on EC2 Stack
 get_wiki_url_stack = getWikiUrlStack(
-    app, "get_wiki_url_stack", vpc=vpc_stack.vpc)
+    app, "get-wiki-url-stack", vpc=vpc_stack.vpc)
 
 xray_profiler_stack = XrayLambdaProfilerStack(
-    app, "xray-lambda-profiler", wiki_api_endpoint=get_wiki_url_stack.web_app_server.public_ip)
+    app, "xray-lambda-profiler", wiki_api_endpoint=get_wiki_url_stack.web_app_server.instance_public_ip)
 
 
 # Stack Level Tagging
