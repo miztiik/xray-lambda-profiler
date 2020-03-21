@@ -36,7 +36,7 @@ def index():
 def api(needle='Python_(programming_language)'):
 
     # resp = {'statusCode': 404, }
-    pg_info = {}
+    pg_info = {'status': False}
 
     try:
         _wiki = wikipediaapi.Wikipedia('en')
@@ -53,7 +53,6 @@ def api(needle='Python_(programming_language)'):
 
     except Exception as e:
         print(str(e))
-        pg_info['status'] = False
         pg_info['ERROR'] = str(e)
 
     if global_args.RENDER_HTML:
@@ -68,9 +67,7 @@ def api(needle='Python_(programming_language)'):
         # Prep for API Gateway
         return {
             'statusCode': 200,
-            'body': json.dumps({
-                'message': pg_info
-            })
+            'body': {'message': pg_info}
         }
 
 

@@ -108,9 +108,12 @@ def _get_wiki_url(endpoint_url):
                   'pallavas', 'sangam_era', 'kural']
 
     try:
+        xray_recorder.put_annotation('BEGIN', '_get_wiki_url')
         resp = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp = json.loads(resp.text)
+        xray_recorder.put_metadata('RESPONSE', resp)
+        xray_recorder.put_annotation('END', '_get_wiki_url')
     except requests.exceptions.RequestException as err:
         LOGGER.error(f'ERROR:{str(err)}')
         resp['error_message'] = str(err)
@@ -124,7 +127,7 @@ def lambda_handler(event, context):
     LOGGER = set_logging(logging.INFO)
     resp = {'status': False, 'jobs_data': ''}
 
-    _get_random_coder_quote
+    _get_random_coder_quote()
     _get_random_fox()
     if os.getenv('WIKI_API_ENDPOINT'):
         _get_wiki_url(os.getenv('WIKI_API_ENDPOINT'))

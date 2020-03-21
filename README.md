@@ -92,6 +92,8 @@
 1. [AWS Blog](https://aws.amazon.com/blogs/aws/aws-lambda-support-for-aws-x-ray/)
 1. [AWS Git Repo For Xray](https://github.com/aws/aws-xray-sdk-python)
 1. [AWS Xray Sample](https://docs.aws.amazon.com/xray/latest/devguide/scorekeep-lambda.html#scorekeep-lambda-worker)
+1. [AWS Xray Daemon Installation](https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ec2.html)
+1. [AWS Xray Daemon Permissions](https://docs.aws.amazon.com/xray/latest/devguide/security_iam_service-with-iam.html)
 1. [Open APIs](https://github.com/public-apis/public-apis)
 
 ### 🏷️ Metadata

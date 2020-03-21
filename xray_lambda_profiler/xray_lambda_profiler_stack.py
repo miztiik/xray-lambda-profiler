@@ -8,10 +8,11 @@ class global_args:
     '''
     Helper to define global statics
     '''
-    OWNER = "MystiqueAutomation"
-    ENVIRONMENT = "production"
-    REPO_NAME = ''
+    OWNER = 'MystiqueAutomation'
+    ENVIRONMENT = 'production'
+    REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
+    VERSION = '2020_03_21'
 
 
 class XrayLambdaProfilerStack(core.Stack):
@@ -74,5 +75,20 @@ class XrayLambdaProfilerStack(core.Stack):
             proxy=False
         )
 
-        get_hot_jobs = hot_jobs_api.root.add_resource("hot_jobs")
-        get_hot_jobs.add_method("GET")
+        get_hot_jobs = hot_jobs_api.root.add_resource('hot_jobs')
+        get_hot_jobs.add_method('GET')
+
+        # get_hot_jobs = hot_jobs_api.root.add_resource('wiki')
+        # get_hot_jobs.add_method('GET')
+
+        output_0 = core.CfnOutput(self,
+                                  "AutomationFrom",
+                                  value=f"{global_args.SOURCE_INFO}",
+                                  description="To know more about this automation stack, check out our github page."
+                                  )
+
+        output_1 = core.CfnOutput(self,
+                                  "APIGatewayUrl",
+                                  value=f'{hot_jobs_api.url}',
+                                  description=f"This url to query for hottest python jobs"
+                                  )

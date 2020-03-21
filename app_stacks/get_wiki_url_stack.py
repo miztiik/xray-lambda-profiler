@@ -48,6 +48,9 @@ class getWikiUrlStack(core.Stack):
                                    managed_policies=[
                                        _iam.ManagedPolicy.from_aws_managed_policy_name(
                                            'AmazonSSMManagedInstanceCore'
+                                       ),
+                                       _iam.ManagedPolicy.from_aws_managed_policy_name(
+                                           'AWSXRayDaemonWriteAccess'
                                        )
                                    ])
         # web_app_server Instance

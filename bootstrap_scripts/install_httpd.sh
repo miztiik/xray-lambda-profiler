@@ -6,6 +6,10 @@
 yum -y install python-pip python3 git
 pip3 install boto3
 
+# Install AWS XRay Daemon for telemetry
+curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /home/ec2-user/xray.rpm
+yum install -y /home/ec2-user/xray.rpm
+
 # Git Clone
 pip3 install flask gunicorn aws_xray_sdk Wikipedia-API
 # mkdir -p /var/
