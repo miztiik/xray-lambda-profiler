@@ -1,0 +1,3 @@
+flask
+gunicorn
+aws_xray_sdk

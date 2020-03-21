@@ -1,0 +1,116 @@
+body {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+h1,
+h2 {
+    color: #377ba8;
+    text-align: center;
+
+}
+h1,
+h2 {
+    margin: 0;
+}
+h1 {
+    border-bottom: 2px solid #eee;
+}
+h2 {
+    font-size: 1.2em;
+}
+select {
+    padding:9px;
+    margin: 0;
+    border-radius:4px;
+    -webkit-box-shadow: 
+        0 0px 0 #ccc,
+        0 0px #fff inset;
+    background: url('http://i45.tinypic.com/309nb74.png') no-repeat right, -moz-linear-gradient(top, #FBFBFB 0%, #E9E9E9 100%);
+    background: url('http://i45.tinypic.com/309nb74.png') no-repeat right, -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FBFBFB), color-stop(100%,#E9E9E9));
+    color:black;
+    border:none;
+    outline:none;
+    display: inline-block;
+    -webkit-appearance:none; 
+    cursor:pointer;
+    border: 1px solid #ccc;
+}
+
+#content {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 14px;
+    text-align: left;
+    border-collapse: collapse;
+    margin: 45px;
+}
+#content th {
+    font-weight: 400;
+    font-size: 14px;
+    color: #339;
+    padding: 12px;
+}
+#content td {
+    color: #669;
+    border-top: 1px solid #fff;
+    padding: 9px 12px;
+}
+#content tfoot td {
+    font-size: 11px;
+}
+#content tbody td {
+    
+}
+#content tbody tr:hover td {
+    color: #339;
+    background: none;
+}
+#rcorners {
+    border-radius: 25px;
+    border: 2px solid #ccf;
+    padding: 20px;
+    text-align: center;
+    padding: 50px;
+}
+#rbutton {
+    background-color: #008CBA;
+    border: 1px;
+    border-radius: 8px;
+    color: #FFF;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    padding: 12px;
+}
+#rtextbox {
+    width: 300px;
+    height: 40px;
+    font-size: 20pt;
+    padding: 1px;
+}
+#rtextbox:focus {
+    outline: #b3b3ff;
+    box-shadow: 0 0 2px #b3b3ff;
+    border-color: #b3b3ff;
+}
+
+#rcornershadow {
+    border-radius: 15px 50px;
+    border:1px solid #408DE6;
+    background:rgba(64,141,230,0.2);
+    padding: 20px;
+    display:inline;
+}
+#data-container {
+    width:90%;
+    padding: 10px; 
+    text-align: justify;
+    margin: 25px 0 0 10px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+    border:1px solid #408DE6;
+    background:rgba(64,141,230,0.2);
+    -webkit-box-shadow: #B3B3B3 10px 10px 10px;
+    -moz-box-shadow: #B3B3B3 10px 10px 10px;
+    box-shadow: #B3B3B3 10px 10px 10px;
+}
