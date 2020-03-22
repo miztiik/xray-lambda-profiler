@@ -1,26 +1,17 @@
 # -*- coding: utf-8 -*-
-"""
-.. module: get_python_jobs.py
-    :Actions: Get 
-    :copyright: (c) 2020 Mystique.,
-.. moduleauthor:: Mystique
-.. contactauthor:: miztiik@github issues
-"""
-
 import json
 import logging
 import os
 import random
+import uuid
 from time import sleep
 
 import requests
 from aws_xray_sdk.core import xray_recorder
-xray_recorder.configure(service='api_on_lambda', sampling=False)
 
-__author__ = 'Mystique'
-__email__ = 'miztiik@github'
-__version__ = '0.0.1'
-__status__ = 'production'
+import boto3
+
+xray_recorder.configure(service='api_on_lambda', sampling=False)
 
 
 class global_args:
@@ -47,11 +38,25 @@ def random_sleep(max_seconds=10):
     sleep((random.randint(0, max_seconds) / 10))
 
 
+def _trigger_excetpion():
+    if not random.randint(1, 9) % 3:
+        return True
+    else:
+        return False
+
+
+def _ddb_put_item(item):
+    _ddb = boto3.resource('dynamodb')
+    _ddb_table = _ddb.Table(os.environ.get('DDB_TABLE_NAME'))
+    item['_id'] = str(uuid.uuid4())
+    LOGGER.info(f"DDB_ITEM:{item}")
+    response = _ddb_table.put_item(
+        Item=item
+    )
+
+
 @xray_recorder.capture('_get_github_jobs')
 def _get_github_jobs(skill='python', location='london'):
-    '''
-    Get Jobs listed in Github
-    '''
     BASE_URL = 'https://jobs.github.com/positions.json'
     HOT_SKILLS = ['python', 'angular', 'microservices',
                   'aws', 'ios', 'containers', 'c']
@@ -63,6 +68,9 @@ def _get_github_jobs(skill='python', location='london'):
     try:
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
+        if _trigger_excetpion():
+            raise requests.exceptions.RequestException(
+                f"Random Exception Triggered To Simulate Failures, Mystique")
     except requests.exceptions.RequestException as err:
         LOGGER.error(f"ERROR:{str(err)}")
         resp['error_message'] = str(err)
@@ -76,25 +84,19 @@ def _get_random_fox():
     payload = {}
     resp = {}
     try:
-        # Begin a short subsegment in AWS Xray
         xray_recorder.begin_subsegment('random_sleep')
-        # Add Random Sleep
         random_sleep()
         xray_recorder.end_subsegment()
 
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f'ERROR:{str(err)}')
         resp['error_message'] = str(err)
     return resp
 
 
 @xray_recorder.capture('_get_random_coder_quote')
 def _get_random_coder_quote():
-    '''
-    Get list of random foxes
-    '''
     BASE_URL = 'https://programming-quotes-api.herokuapp.com/quotes/random'
     payload = {}
     resp = {}
@@ -104,7 +106,6 @@ def _get_random_coder_quote():
         resp = json.loads(resp.text)
         xray_recorder.end_subsegment()
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f'ERROR:{str(err)}')
         resp['error_message'] = str(err)
     return resp
 
@@ -118,14 +119,12 @@ def _get_wiki_url(endpoint_url):
                   'pallavas', 'sangam_era', 'kural']
 
     try:
-        xray_recorder.put_annotation('BEGIN', '_get_wiki_url')
+        xray_recorder.put_annotation('PROCESS', '_get_wiki_url')
         resp = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp = json.loads(resp.text)
         xray_recorder.put_metadata('RESPONSE', resp)
-        xray_recorder.put_annotation('END', '_get_wiki_url')
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f'ERROR:{str(err)}')
         resp['error_message'] = str(err)
     return resp
 
@@ -139,7 +138,8 @@ def lambda_handler(event, context):
     _get_random_coder_quote()
     _get_random_fox()
     if os.getenv('WIKI_API_ENDPOINT'):
-        _get_wiki_url(os.getenv('WIKI_API_ENDPOINT'))
+        res = _get_wiki_url(os.getenv('WIKI_API_ENDPOINT'))
+        _ddb_put_item(res)
     resp = _get_github_jobs()
 
     return {
@@ -148,7 +148,3 @@ def lambda_handler(event, context):
             "message": resp
         })
     }
-
-
-if __name__ == '__main__':
-    lambda_handler({}, {})

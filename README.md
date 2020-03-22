@@ -62,6 +62,8 @@
 
     The _Outputs_ section of the Clouformation template/service has the required information.
 
+    - Use the `
+
 1. ## 🧹 CleanUp
 
     If you want to destroy all the resources created by the stack, Execute the below command to delete the stack, or _you can delete the stack from console as well_

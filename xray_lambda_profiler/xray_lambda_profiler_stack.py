@@ -1,6 +1,7 @@
 from aws_cdk import core
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_apigateway as _apigw
+from aws_cdk import aws_dynamodb as _dynamodb
 
 
 class global_args:
@@ -18,6 +19,12 @@ class XrayLambdaProfilerStack(core.Stack):
 
     def __init__(self, scope: core.Construct, id: str, wiki_api_endpoint, ** kwargs) -> None:
         super().__init__(scope, id, **kwargs)
+
+        # DynamodDB Table
+        queries_table = _dynamodb.Table(self, "queriesDataTable",
+                                        partition_key=_dynamodb.Attribute(
+                                            name="_id", type=_dynamodb.AttributeType.STRING)
+                                        )
 
         # Create AWS XRay Layer
         aws_xray_layer = _lambda.LayerVersion(self, 'awsXrayLayer',
@@ -56,12 +63,15 @@ class XrayLambdaProfilerStack(core.Stack):
             timeout=core.Duration.seconds(300),
             environment={
                 'LD_LIBRARY_PATH': '/opt/python',
-                # 'WIKI_API_ENDPOINT_OLD': f'http://{wiki_api_endpoint}/api',
                 'WIKI_API_ENDPOINT': wiki_api_endpoint,
+                'DDB_TABLE_NAME': queries_table.table_name,
             },
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
         )
+
+        # Grant Lambda permissions to write to Dynamodb
+        queries_table.grant_read_write_data(get_python_jobs_fn)
 
         # Create API Gateway
         hot_jobs_api = _apigw.LambdaRestApi(
