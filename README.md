@@ -2,9 +2,9 @@
 
   Trace your lambda function requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them.
 
-  ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik_elasticache-for-app-performance_architecture.png)
+  ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture.png)
 
-  Here, let me show, how you can set up an in-memory cache using ElastiCache for Redis, along with best practices to be used with S3. You can also test the performance benefits of incorporating a cache for S3. All the necessary code is written in Cloudformation using CDK.
+  Consider the above scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. Now if you want to find out who long does it take for those calls, then you can use AWS Xray to trace those calls.
 
   Follow this article in **[Youtube](https://www.youtube.com/c/ValaxyTechnologies)**
 
@@ -24,19 +24,19 @@
     - Get the application code
 
         ```bash
-        git clone https://github.com/miztiik/elasticache-for-app-performance.git
-        cd elasticache-for-app-performance
+        git clone https://github.com/miztiik/xray-lambda-profiler.git
+        cd xray-lambda-profiler
         ```
 
 1. ## 🚀 Resource Deployment using AWS CDK
 
     The cdk stack provided in the repo will create the following resources,
     - VPC with public & private subnets, route table for private subnet
-    - NAT Gateway x 1 for private subnet to communicate with the internet
-    - AWS ElastiCache inside private subnet
-    - S3 Bucket
-    - Lambda - To ingest dummy test data into _S3_ & _AWS ElastiCache_
-    - EC2 Instance in public subnet: We will use this instances to simulate a application client querying _S3_ or _AWS ElastiCache_
+    - API GW to front end Application running inside Lambda
+        - Lambda Layers for dependent binaries
+        - S3 Bucket to host Lambda Layer code
+    - 3<sup>rd</sup> Party Data Provider App on EC2 running inside public subnet
+        - Another API GW front-ending our EC2 App
 
     **Note**: _Most of the resources should be covered under the aws free tier, except the NAT Gateway. You can swap it out for a NAT Instance_.
 
@@ -47,7 +47,6 @@
     # Make sure you in root directory
     python3 -m venv .env
     source .env/bin/activate
-    pip install aws-xray-sdk
     pip install -r requirements.txt
     ```
 
@@ -55,7 +54,8 @@
 
     ```bash
     cdk bootstrap
-    cdk deploy
+    cdk deploy xray-lambda-profiler
+    # Follow onscreen prompts
     ```
 
 1. ## 🔬 Testing the solution
