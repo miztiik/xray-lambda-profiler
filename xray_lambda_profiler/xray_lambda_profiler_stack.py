@@ -1,6 +1,5 @@
 from aws_cdk import core
 from aws_cdk import aws_lambda as _lambda
-from aws_cdk import aws_ec2 as _ec2
 from aws_cdk import aws_apigateway as _apigw
 
 
@@ -19,55 +18,6 @@ class XrayLambdaProfilerStack(core.Stack):
 
     def __init__(self, scope: core.Construct, id: str, wiki_api_endpoint, ** kwargs) -> None:
         super().__init__(scope, id, **kwargs)
-
-        # Create API Gateway
-        api_01 = _apigw.RestApi(self, 'apiEndpoint',
-                                rest_api_name='mystique-xray-api')
-        v1 = api_01.root.add_resource("v1")
-
-        # Add resource for HTTP Endpoint: API Hosted on EC2
-        wiki_url_path_00 = v1.add_resource('wiki_url')
-        wiki_url_path_01 = wiki_url_path_00.add_resource('{needle}')
-
-        list_objects_responses = [_apigw.IntegrationResponse(status_code="200",
-                                                             response_parameters={
-                                                                 'method.response.header.Timestamp': 'integration.response.header.Date',
-                                                                 'method.response.header.Content-Length': 'integration.response.header.Content-Length',
-                                                                 'method.response.header.Content-Type': 'integration.response.header.Content-Type'
-                                                             }
-                                                             )
-                                  ]
-
-        wiki_url_integration_options = _apigw.IntegrationOptions(
-            integration_responses=list_objects_responses,
-            request_parameters={
-                "integration.request.path.needle": "method.request.path.needle"}
-        )
-
-        wiki_url_integration = _apigw.HttpIntegration(
-            url=f'http://{wiki_api_endpoint}/api/{{needle}}',
-            http_method='GET',
-            options=wiki_url_integration_options,
-            proxy=False,
-        )
-        wiki_url_method = wiki_url_path_01.add_method(
-            "GET", wiki_url_integration,
-            request_parameters={
-                'method.request.header.Content-Type': False,
-                'method.request.path.needle': True
-            },
-            method_responses=[_apigw.MethodResponse(status_code="200",
-                                                    response_parameters={
-                                                        'method.response.header.Timestamp': False,
-                                                        'method.response.header.Content-Length': False,
-                                                        'method.response.header.Content-Type': False
-                                                    },
-                                                    response_models={
-                                                        'application/json': _apigw.EmptyModel()
-                                                    }
-                                                    )
-                              ]
-        )
 
         # Create AWS XRay Layer
         aws_xray_layer = _lambda.LayerVersion(self, 'awsXrayLayer',
@@ -106,18 +56,27 @@ class XrayLambdaProfilerStack(core.Stack):
             timeout=core.Duration.seconds(300),
             environment={
                 'LD_LIBRARY_PATH': '/opt/python',
-                'WIKI_API_ENDPOINT_OLD': f'http://{wiki_api_endpoint}/api',
-                'WIKI_API_ENDPOINT': f'{wiki_url_path_00.url}',
+                # 'WIKI_API_ENDPOINT_OLD': f'http://{wiki_api_endpoint}/api',
+                'WIKI_API_ENDPOINT': wiki_api_endpoint,
             },
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
         )
 
-        # Add resource for jobs API
-        hot_jobs = v1.add_resource('hot_jobs')
-        hot_jobs_integration = _apigw.LambdaIntegration(get_python_jobs_fn)
-        hot_jobs_method = hot_jobs.add_method(
-            "GET", hot_jobs_integration)
+        # Create API Gateway
+        hot_jobs_api = _apigw.LambdaRestApi(
+            self,
+            'hotJobsApi',
+            default_cors_preflight_options={
+                "allow_origins": _apigw.Cors.ALL_ORIGINS
+            },
+            handler=get_python_jobs_fn,
+            proxy=False,
+            rest_api_name='mystique-xray-api'
+        )
+
+        hot_jobs_api_resource = hot_jobs_api.root.add_resource("hot_jobs")
+        hot_jobs_api_resource.add_method("GET")
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
@@ -126,19 +85,7 @@ class XrayLambdaProfilerStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
-                                  "APIGatewayUrl",
-                                  value=f'{api_01.url}',
-                                  description=f"This url to query for hottest python jobs"
-                                  )
-
-        output_2 = core.CfnOutput(self,
                                   'HottestJobs',
-                                  value=f'{hot_jobs.url}',
+                                  value=f'{hot_jobs_api_resource.url}',
                                   description=f'Get the jobs openings for HOTTEST SKILLS from Github'
-                                  )
-
-        output_3 = core.CfnOutput(self,
-                                  "GetWiki",
-                                  value=f'{wiki_url_path_00.url}',
-                                  description=f'Get Wiki Url for given topic'
                                   )

@@ -2,6 +2,7 @@
 
 from aws_cdk import core
 
+from xray_lambda_profiler.wiki_api_stack import wikiApiStack
 from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerStack
 from app_stacks.vpc_stack import VpcStack
 from app_stacks.get_wiki_url_stack import getWikiUrlStack
@@ -14,8 +15,15 @@ vpc_stack = VpcStack(app, "get-wiki-url-stack-vpc-stack")
 get_wiki_url_stack = getWikiUrlStack(
     app, "get-wiki-url-stack", vpc=vpc_stack.vpc)
 
+# Deploy the API GW, with the HTTP Endpoint Integration
+api_gw_for_xray_profiler_stack = wikiApiStack(app, "api-gw-for-xray-profiler",
+                                              wiki_api_endpoint=get_wiki_url_stack.web_app_server.instance_public_ip)
+
+# Deploy the AWS XRay Profiler, with the Lambda Integrated with APIGW
 xray_profiler_stack = XrayLambdaProfilerStack(
-    app, "xray-lambda-profiler", wiki_api_endpoint=get_wiki_url_stack.web_app_server.instance_public_ip)
+    app, "xray-lambda-profiler",
+    wiki_api_endpoint=api_gw_for_xray_profiler_stack.wiki_url_path_00.url
+)
 
 
 # Stack Level Tagging

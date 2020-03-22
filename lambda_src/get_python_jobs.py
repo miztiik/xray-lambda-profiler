@@ -14,8 +14,8 @@ import random
 from time import sleep
 
 import requests
-# from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
+xray_recorder.configure(service='api_on_lambda', sampling=False)
 
 __author__ = 'Mystique'
 __email__ = 'miztiik@github'
@@ -72,15 +72,16 @@ def _get_github_jobs(skill='python', location='london'):
 
 @xray_recorder.capture('_get_random_fox')
 def _get_random_fox():
-    '''
-    Get list of random foxes
-    '''
     BASE_URL = 'https://randomfox.ca/floof'
     payload = {}
     resp = {}
     try:
+        # Begin a short subsegment in AWS Xray
+        xray_recorder.begin_subsegment('random_sleep')
         # Add Random Sleep
         random_sleep()
+        xray_recorder.end_subsegment()
+
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
@@ -98,7 +99,6 @@ def _get_random_coder_quote():
     payload = {}
     resp = {}
     try:
-        # Begin a short subsegment in AWS Xray
         xray_recorder.begin_subsegment('random_quotes_trace')
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
@@ -132,7 +132,6 @@ def _get_wiki_url(endpoint_url):
 
 @xray_recorder.capture('lambda_handler')
 def lambda_handler(event, context):
-    # Initialize Logger
     global LOGGER
     LOGGER = set_logging(logging.INFO)
     resp = {'status': False, 'jobs_data': ''}
