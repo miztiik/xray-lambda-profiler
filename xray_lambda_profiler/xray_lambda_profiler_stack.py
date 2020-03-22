@@ -57,7 +57,7 @@ class XrayLambdaProfilerStack(core.Stack):
             timeout=core.Duration.seconds(300),
             environment={
                 'LD_LIBRARY_PATH': '/opt/python',
-                'WIKI_API_ENDPOINT': wiki_api_endpoint
+                'WIKI_API_ENDPOINT': f'http://{wiki_api_endpoint}/api'
             },
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
@@ -75,11 +75,21 @@ class XrayLambdaProfilerStack(core.Stack):
             proxy=False
         )
 
-        get_hot_jobs = hot_jobs_api.root.add_resource('hot_jobs')
-        get_hot_jobs.add_method('GET')
+        api_01 = _apigw.RestApi(self, "apiEndpoint")
+        v1 = api_01.root.add_resource("v1")
 
-        # get_hot_jobs = hot_jobs_api.root.add_resource('wiki')
-        # get_hot_jobs.add_method('GET')
+        # Add resource for jobs API
+        hot_jobs = v1.add_resource('hot_jobs')
+        hot_jobs_integration = _apigw.LambdaIntegration(get_python_jobs_fn)
+        hot_jobs_method = hot_jobs.add_method(
+            "GET", hot_jobs_integration)
+
+        # Add resource for HTTP Endpoint: API Hosted on EC2
+        wiki_url = v1.add_resource('wiki_url')
+        wiki_url_integration = _apigw.HttpIntegration(
+            url=f'http://{wiki_api_endpoint}/api/{{needle}}', http_method='GET', proxy=False)
+        wiki_url_method = wiki_url.add_method(
+            "GET", wiki_url_integration)
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",

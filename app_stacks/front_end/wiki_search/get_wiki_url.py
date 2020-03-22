@@ -3,7 +3,7 @@ import os
 import wikipediaapi
 
 from aws_xray_sdk.core import xray_recorder
-from flask import Flask, redirect, render_template, request, url_for, jsonify
+from flask import Flask, redirect, render_template, request, url_for
 
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
@@ -39,8 +39,8 @@ def api(needle='Python_(programming_language)'):
     pg_info = {'status': False}
 
     try:
-        # AWS XRay Metadata
-        xray_recorder.put_metadata('RESPONSE', resp)
+        # AWS XRay Annotation
+        xray_recorder.put_annotation('BEGIN', 'WIKI_URL_GET')
 
         _wiki = wikipediaapi.Wikipedia('en')
         _wiki_page = _wiki.page(str(needle))
@@ -53,12 +53,11 @@ def api(needle='Python_(programming_language)'):
             pg_info['summary'] = _wiki_page.summary[0:100]
             pg_info['url'] = _wiki_page.fullurl
             pg_info['status'] = True
+            # AWS XRay Metadata
+            xray_recorder.put_metadata('RESPONSE', pg_info)
 
-            # AWS XRay Annotation
-            xray_recorder.put_annotation('BEGIN', pg_info)
-
-        # AWS XRay Metadata
-        xray_recorder.put_annotation('END', 'FLASK_APP')
+        # AWS XRay Annotation
+        xray_recorder.put_annotation('END', 'WIKI_URL_GET')
     except Exception as e:
         print(str(e))
         pg_info['ERROR'] = str(e)

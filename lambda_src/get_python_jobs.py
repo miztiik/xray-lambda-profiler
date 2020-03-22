@@ -101,7 +101,7 @@ def _get_random_coder_quote():
 
 @xray_recorder.capture('_get_wiki_url')
 def _get_wiki_url(endpoint_url):
-    BASE_URL = f'http://{endpoint_url}/api'
+    BASE_URL = endpoint_url
     payload = {}
     resp = {}
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
