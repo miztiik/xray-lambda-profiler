@@ -9,10 +9,9 @@
 
 import json
 import logging
-# import boto3
 import os
 import random
-import time
+from time import sleep
 
 import requests
 # from aws_xray_sdk.core import patch_all
@@ -44,14 +43,20 @@ def set_logging(lv=global_args.LOG_LEVEL):
     return LOGGER
 
 
+def random_sleep(max_seconds=10):
+    sleep((random.randint(0, max_seconds) / 10))
+
+
 @xray_recorder.capture('_get_github_jobs')
 def _get_github_jobs(skill='python', location='london'):
     '''
     Get Jobs listed in Github
     '''
     BASE_URL = 'https://jobs.github.com/positions.json'
+    HOT_SKILLS = ['python', 'angular', 'microservices',
+                  'aws', 'ios', 'containers', 'c']
     payload = {
-        'skill': skill,
+        'skill': random.choice(HOT_SKILLS),
         'location': location
     }
     resp = {}
@@ -59,8 +64,8 @@ def _get_github_jobs(skill='python', location='london'):
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        LOGGER.error(f"ERROR:{str(e)}")
-        resp['error_message'] = str(e)
+        LOGGER.error(f"ERROR:{str(err)}")
+        resp['error_message'] = str(err)
 
     return resp
 
@@ -74,6 +79,8 @@ def _get_random_fox():
     payload = {}
     resp = {}
     try:
+        # Add Random Sleep
+        random_sleep()
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
@@ -91,8 +98,11 @@ def _get_random_coder_quote():
     payload = {}
     resp = {}
     try:
+        # Begin a short subsegment in AWS Xray
+        xray_recorder.begin_subsegment('random_quotes_trace')
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
+        xray_recorder.end_subsegment()
     except requests.exceptions.RequestException as err:
         LOGGER.error(f'ERROR:{str(err)}')
         resp['error_message'] = str(err)

@@ -64,17 +64,6 @@ class XrayLambdaProfilerStack(core.Stack):
         )
 
         # Create API Gateway
-        hot_jobs_api = _apigw.LambdaRestApi(
-            self,
-            'hotJobsApi',
-            default_cors_preflight_options={
-                "allow_origins": _apigw.Cors.ALL_ORIGINS,
-                # "allow_methods": _apigw.Cors.ALL_METHODS
-            },
-            handler=get_python_jobs_fn,
-            proxy=False
-        )
-
         api_01 = _apigw.RestApi(self, "apiEndpoint")
         v1 = api_01.root.add_resource("v1")
 
@@ -99,6 +88,6 @@ class XrayLambdaProfilerStack(core.Stack):
 
         output_1 = core.CfnOutput(self,
                                   "APIGatewayUrl",
-                                  value=f'{hot_jobs_api.url}',
+                                  value=f'{api_01.url}',
                                   description=f"This url to query for hottest python jobs"
                                   )
