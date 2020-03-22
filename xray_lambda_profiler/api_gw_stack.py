@@ -15,7 +15,7 @@ class global_args:
     VERSION = '2020_03_21'
 
 
-class XrayLambdaProfilerStack(core.Stack):
+class ApiGwStack(core.Stack):
 
     def __init__(self, scope: core.Construct, id: str, wiki_api_endpoint, ** kwargs) -> None:
         super().__init__(scope, id, **kwargs)
@@ -106,8 +106,8 @@ class XrayLambdaProfilerStack(core.Stack):
             timeout=core.Duration.seconds(300),
             environment={
                 'LD_LIBRARY_PATH': '/opt/python',
-                'WIKI_API_ENDPOINT_OLD': f'http://{wiki_api_endpoint}/api',
-                'WIKI_API_ENDPOINT': f'{wiki_url_path_00.url}',
+                'WIKI_API_ENDPOINT': f'http://{wiki_api_endpoint}/api',
+                # 'WIKI_API_ENDPOINT': f'{wiki_url_path_00.url}',
             },
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
