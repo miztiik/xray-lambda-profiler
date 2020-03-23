@@ -62,7 +62,13 @@
 
     The _Outputs_ section of the Clouformation template/service has the required information.
 
-    - Use the `
+    - Use the `hot_jobs` url in the browser few times(x10)
+    - Goto _AWS XRay_ Service check the service map for latency, errors etc.,
+
+    You should be able to notice graphs similar to this,
+    ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture_01.png)
+
+    - You can check out the annotations, metadata to gather further insights.
 
 1. ## 🧹 CleanUp
 
