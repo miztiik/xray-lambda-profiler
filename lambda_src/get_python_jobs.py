@@ -47,9 +47,10 @@ def _ddb_put_item(item):
     _ddb_table = _ddb.Table(os.environ.get('DDB_TABLE_NAME'))
     item['_id'] = str(uuid.uuid4())
     LOGGER.info(f"DDB_ITEM:{item}")
-    response = _ddb_table.put_item(
-        Item=item
-    )
+    try:
+        _ddb_table.put_item(Item=item)
+    except Exception as err:
+        LOGGER.error(f"Unable to write to DDB.{str(err)}")
 
 
 @xray_recorder.capture('_get_github_jobs')
@@ -63,13 +64,8 @@ def _get_github_jobs(skill='python', location='london'):
     }
     resp = {}
     try:
-        _ddb_put_item(payload)
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
-        if _trigger_exception():
-            xray_recorder.put_annotation('RANDOM_ERROR', 'True')
-            raise Exception(
-                "RANDOM_ERROR: Simulate Mystique Failure")
     except Exception as err:
         resp = {'error_message': str(err)}
     return resp
@@ -117,13 +113,19 @@ def _get_wiki_url(endpoint_url):
         xray_recorder.begin_subsegment('random_sleep')
         random_sleep()
         xray_recorder.end_subsegment()
+
+        if _trigger_exception():
+            xray_recorder.put_annotation('RANDOM_ERROR', 'True')
+            raise Exception(
+                "RANDOM_ERROR: Simulate Mystique Failure")
+
         url_info = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp["statusCode"] = 200
         resp["body"]["message"] = url_info.text
         xray_recorder.put_metadata('RESPONSE', resp)
-    except requests.exceptions.RequestException as err:
-        resp["body"]["message"]["error_message"] = str(err)
+    except Exception as err:
+        resp = {'error_message': str(err)}
     return resp
 
 
@@ -138,12 +140,12 @@ def lambda_handler(event, context):
         }
     }
 
-    _get_random_coder_quote()
-    _get_random_fox()
+    LOGGER.info(_get_random_coder_quote())
+    LOGGER.info(_get_random_fox())
     if os.getenv("WIKI_API_ENDPOINT"):
         xray_recorder.put_annotation("GET_WIKI_API_ENDPOINT", "api_on_lambda")
         res = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
-        # _ddb_put_item(res)
+        _ddb_put_item(res)
     resp = _get_github_jobs()
 
     return resp

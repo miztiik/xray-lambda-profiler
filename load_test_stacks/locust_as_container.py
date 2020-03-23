@@ -43,13 +43,15 @@ class LocustFargateStack(core.Stack):
         locust_container = locust_task_def.add_container("locustAppContainer",
                                                          environment={
                                                              "github_profile": "https://github.com/miztiik",
-                                                             "LOCUSTFILE_PATH": "",
+                                                             "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": "--clients=250 --hatch-rate 10 --no-web --run-time=300 --print-stats",
-                                                             "ADDTIONAL_CUSTOM_OPTIONS": "--reset-stats --only-summary"
+                                                             "LOCUST_OPTS": "--clients=150 --hatch-rate 10 --no-web --run-time=600 --only-summary",
+                                                             # --clients The number of concurrent Locust users.
+                                                             # --hatch-rate The rate per second in which clients are spawned.
+                                                             "ADDTIONAL_CUSTOM_OPTIONS": "--reset-stats --print-stats"
                                                          },
                                                          image=_ecs.ContainerImage.from_registry(
-                                                             "locustio/locust:latest"),
+                                                             "mystique/xray-lambda-profiler:latest"),
                                                          logging=_ecs.LogDrivers.aws_logs(
                                                              stream_prefix="Mystique")
                                                          )
@@ -66,7 +68,6 @@ class LocustFargateStack(core.Stack):
                                              task_definition=locust_task_def,
                                              desired_count=2,
                                              assign_public_ip=True,
-                                             vpc_subnets=_ec2.SubnetType.PUBLIC,
                                              service_name=f"{global_args.OWNER}-LocustLoadGenerator"
                                              )
 
@@ -76,13 +77,15 @@ class LocustFargateStack(core.Stack):
                                   description="To know more about this automation stack, check out our github page."
                                   )
 
-        output_1 = core.CfnOutput(self, "LocustClusterNameOutput",
+        output_1 = core.CfnOutput(self,
+                                  "LocustClusterName",
                                   value=f"{locust_cluster.cluster_name}",
-                                  export_name="locustClusterName"
+                                  export_name="locustClusterName",
+                                  description="The fargate cluster to generate load on APIs using Locust"
                                   )
 
         output_2 = core.CfnOutput(self,
                                   "locustAppServiceUrl",
                                   value=f"http://{locust_service.service_name}",
-                                  description="To know more about this automation stack, check out our github page."
+                                  description="Load generation fargate service name"
                                   )

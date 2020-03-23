@@ -63,6 +63,8 @@
     The _Outputs_ section of the Clouformation template/service has the required information.
 
     - Use the `hot_jobs` url in the browser few times(x10)
+        - You can also launch `cdk deploy locust-load-testing-stack` to generate load on your API automatically
+            - Stack launches Fargate Cluster running locust services (`x2`)
     - Goto _AWS XRay_ Service check the service map for latency, errors etc.,
 
     You should be able to notice graphs similar to this,
