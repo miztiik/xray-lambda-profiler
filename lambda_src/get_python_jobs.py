@@ -7,20 +7,16 @@ import uuid
 from time import sleep
 
 import requests
-from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all, xray_recorder
 
 import boto3
 
-xray_recorder.configure(service='api_on_lambda', sampling=False)
+patch_all()
+xray_recorder.configure(service="api_on_lambda", sampling=False)
 
 
 class global_args:
-    """
-    Global statics
-    """
     OWNER = 'Mystique'
-    ENVIRONMENT = 'production'
-    MODULE_NAME = 'get_python_jobs.py'
     LOG_LEVEL = logging.INFO
 
 
@@ -38,11 +34,12 @@ def random_sleep(max_seconds=10):
     sleep((random.randint(0, max_seconds) / 10))
 
 
-def _trigger_excetpion():
-    if not random.randint(1, 9) % 3:
-        return True
-    else:
-        return False
+def _trigger_exception():
+    r = False
+    if os.getenv('TRIGGER_RANDOM_FAILURES', False):
+        if not random.randint(1, 8) % 3:
+            r = True
+    return r
 
 
 def _ddb_put_item(item):
@@ -66,15 +63,15 @@ def _get_github_jobs(skill='python', location='london'):
     }
     resp = {}
     try:
+        _ddb_put_item(payload)
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
-        if _trigger_excetpion():
-            raise requests.exceptions.RequestException(
-                f"Random Exception Triggered To Simulate Failures, Mystique")
-    except requests.exceptions.RequestException as err:
-        LOGGER.error(f"ERROR:{str(err)}")
-        resp['error_message'] = str(err)
-
+        if _trigger_exception():
+            xray_recorder.put_annotation('RANDOM_ERROR', 'True')
+            raise Exception(
+                "RANDOM_ERROR: Simulate Mystique Failure")
+    except Exception as err:
+        resp = {'error_message': str(err)}
     return resp
 
 
@@ -84,14 +81,10 @@ def _get_random_fox():
     payload = {}
     resp = {}
     try:
-        xray_recorder.begin_subsegment('random_sleep')
-        random_sleep()
-        xray_recorder.end_subsegment()
-
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
     except requests.exceptions.RequestException as err:
-        resp['error_message'] = str(err)
+        resp = {'error_message': str(err)}
     return resp
 
 
@@ -106,7 +99,7 @@ def _get_random_coder_quote():
         resp = json.loads(resp.text)
         xray_recorder.end_subsegment()
     except requests.exceptions.RequestException as err:
-        resp['error_message'] = str(err)
+        resp = {'error_message': str(err)}
     return resp
 
 
@@ -114,18 +107,23 @@ def _get_random_coder_quote():
 def _get_wiki_url(endpoint_url):
     BASE_URL = endpoint_url
     payload = {}
-    resp = {}
+    resp = {
+        "statusCode": 500,
+        "body": {"message": ""}
+    }
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
                   'pallavas', 'sangam_era', 'kural']
-
     try:
-        xray_recorder.put_annotation('PROCESS', '_get_wiki_url')
-        resp = requests.get(
+        xray_recorder.begin_subsegment('random_sleep')
+        random_sleep()
+        xray_recorder.end_subsegment()
+        url_info = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
-        resp = json.loads(resp.text)
+        resp["statusCode"] = 200
+        resp["body"]["message"] = url_info.text
         xray_recorder.put_metadata('RESPONSE', resp)
     except requests.exceptions.RequestException as err:
-        resp['error_message'] = str(err)
+        resp["body"]["message"]["error_message"] = str(err)
     return resp
 
 
@@ -133,18 +131,19 @@ def _get_wiki_url(endpoint_url):
 def lambda_handler(event, context):
     global LOGGER
     LOGGER = set_logging(logging.INFO)
-    resp = {'status': False, 'jobs_data': ''}
+    resp = {
+        "statusCode": 500,
+        "body": {
+            "message": "Internal Mystical Error"
+        }
+    }
 
     _get_random_coder_quote()
     _get_random_fox()
-    if os.getenv('WIKI_API_ENDPOINT'):
-        res = _get_wiki_url(os.getenv('WIKI_API_ENDPOINT'))
-        _ddb_put_item(res)
+    if os.getenv("WIKI_API_ENDPOINT"):
+        xray_recorder.put_annotation("GET_WIKI_API_ENDPOINT", "api_on_lambda")
+        res = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
+        # _ddb_put_item(res)
     resp = _get_github_jobs()
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": resp
-        })
-    }
+    return resp

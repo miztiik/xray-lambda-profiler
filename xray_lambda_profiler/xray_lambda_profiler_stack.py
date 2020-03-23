@@ -65,6 +65,7 @@ class XrayLambdaProfilerStack(core.Stack):
                 'LD_LIBRARY_PATH': '/opt/python',
                 'WIKI_API_ENDPOINT': wiki_api_endpoint,
                 'DDB_TABLE_NAME': queries_table.table_name,
+                'TRIGGER_RANDOM_FAILURES': 'True'
             },
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
