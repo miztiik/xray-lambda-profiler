@@ -7,6 +7,8 @@ from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerSt
 from app_stacks.vpc_stack import VpcStack
 from app_stacks.get_wiki_url_stack import getWikiUrlStack
 
+from load_test_stacks.locust_as_container import LocustFargateStack
+
 app = core.App()
 # VPC Stack for hosting EC2 & Other resources
 vpc_stack = VpcStack(app, "get-wiki-url-stack-vpc-stack")
@@ -17,7 +19,8 @@ get_wiki_url_stack = getWikiUrlStack(
 
 # Deploy the API GW, with the HTTP Endpoint Integration
 api_gw_for_xray_profiler_stack = wikiApiStack(app, "api-gw-for-xray-profiler",
-                                              wiki_api_endpoint=get_wiki_url_stack.web_app_server.instance_public_ip)
+                                              wiki_api_endpoint=get_wiki_url_stack.web_app_server.instance_public_ip
+                                              )
 
 # Deploy the AWS XRay Profiler, with the Lambda Integrated with APIGW
 xray_profiler_stack = XrayLambdaProfilerStack(
@@ -25,6 +28,13 @@ xray_profiler_stack = XrayLambdaProfilerStack(
     wiki_api_endpoint=api_gw_for_xray_profiler_stack.wiki_url_path_00.url
 )
 
+# Deploy Load Testing Tool - Locust Stack
+locust_stack = LocustFargateStack(
+    app, f"locust-load-testing-stack",
+    vpc=vpc_stack.vpc,
+    url=xray_profiler_stack.hot_jobs_api_resource.url,
+    tps=1000
+)
 
 # Stack Level Tagging
 core.Tag.add(app, key="Owner",

@@ -86,8 +86,8 @@ class XrayLambdaProfilerStack(core.Stack):
             rest_api_name='mystique-xray-api'
         )
 
-        hot_jobs_api_resource = hot_jobs_api.root.add_resource("hot_jobs")
-        hot_jobs_api_resource.add_method("GET")
+        self.hot_jobs_api_resource = hot_jobs_api.root.add_resource("hot_jobs")
+        self.hot_jobs_api_resource.add_method("GET")
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
@@ -97,6 +97,6 @@ class XrayLambdaProfilerStack(core.Stack):
 
         output_1 = core.CfnOutput(self,
                                   'HottestJobs',
-                                  value=f'{hot_jobs_api_resource.url}',
+                                  value=f'{self.hot_jobs_api_resource.url}',
                                   description=f'Get the jobs openings for HOTTEST SKILLS from Github'
                                   )

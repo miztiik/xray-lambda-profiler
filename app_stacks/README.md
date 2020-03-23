@@ -1,5 +1,5 @@
-# Launch app with EC2, Redis, S3, Lambda to Test Redis Performance
+# Profile AWS Lambda Calls using X-ray
 
-Launch app with EC2, Redis, S3, Lambda to Test Redis Performance
+Launch an python app running in Lambda behind API Gateway.
 
-![Launch app with EC2, Redis, S3, Lambda to Test Redis Performance](images/app_alb_asg_architecture.png)
+![Profile AWS Lambda Calls using X-ray](images/app_alb_asg_architecture.png)
