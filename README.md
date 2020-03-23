@@ -1,10 +1,10 @@
 # Profile AWS Lambda Calls using X-ray
 
-  Trace your lambda function requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them.
-
   ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture.png)
 
-  Consider the above scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. Now if you want to find out who long does it take for those calls, then you can use AWS Xray to trace those calls.
+  Consider the scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. Now if you want to find out who long does it take for those calls, then you can use AWS Xray to trace those calls.
+
+  Trace your lambda function requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them.
 
   Follow this article in **[Youtube](https://www.youtube.com/c/ValaxyTechnologies)**
 
@@ -64,7 +64,8 @@
 
     - Use the `hot_jobs` url in the browser few times(x10)
         - You can also launch `cdk deploy locust-load-testing-stack` to generate load on your API automatically
-            - Stack launches Fargate Cluster running locust services (`x2`)
+            - This will launch a Fargate Cluster running locust service (`x2`)
+            - Locust is designed to answer: _How many concurrent users can my application support?_
     - Goto _AWS XRay_ Service check the service map for latency, errors etc.,
 
     You should be able to notice graphs similar to this,
@@ -77,6 +78,7 @@
     If you want to destroy all the resources created by the stack, Execute the below command to delete the stack, or _you can delete the stack from console as well_
 
     - Resources created during [deployment](#🚀-resource-deployment-using-aws-cdk)
+    - Destroy Locust stack, if deployed
     - Delete CloudWatch Lambda LogGroups
     - _Any other custom resources, you have created for this demo_
 
