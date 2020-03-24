@@ -1,17 +1,17 @@
-[App User]-->[Web App{bg:wheat}]
+[API GW1]-->[Web App|Lambda{bg:wheat}]
 
-[Web App{bg:wheat}]-->[Lambda | Get Data{bg:orange}]
 
-[Lambda | Get Data{bg:green}]-->[ Method 001{bg:green}]
+[Web App|Lambda{bg:green}]-->[ Method 001{bg:green}]
 
-[Lambda | Get Data{bg:green}]-->[ Method 002{bg:green}]
+[Web App|Lambda{bg:green}]-->[ Method 002{bg:green}]
 
-[Lambda | Get Data{bg:green}]-->[Method 003{bg:red}]
+[Web App|Lambda{bg:green}]-->[Method 003{bg:red}]
 
-[App| API 002{bg:wheat}]-.->[EC2 Endpoint| Get Data{bg:wheat}]
+[API GW2]-->[Web App 2|on EC2{bg:wheat}]
 
-[EC2 Endpoint| Get Data{bg:wheat}]-.->[ Call|API X{bg:orange}]
 
-[Method 003{bg:red}]External-.->[App| API02{bg:wheat}]
 
-[Lambda | Get Data{bg:green}]--[note: Lambda behind API GW{bg:wheat}]
+[Web App 2|on EC2{bg:wheat}]-->[ Get Data|API X{bg:orange}]
+
+[Method 003{bg:red}]External-.-*>[API GW]
+
