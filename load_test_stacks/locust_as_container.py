@@ -45,10 +45,10 @@ class LocustFargateStack(core.Stack):
                                                              "github_profile": "https://github.com/miztiik",
                                                              "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": "--clients=150 --hatch-rate 10 --no-web --run-time=16 --only-summary",
+                                                             "LOCUST_OPTS": "--clients=150 --hatch-rate 10 --no-web --run-time=16 --print-stats",
                                                              # --clients The number of concurrent Locust users.
                                                              # --hatch-rate The rate per second in which clients are spawned.
-                                                             # -run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )
+                                                             # --run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )
                                                              "ADDTIONAL_CUSTOM_OPTIONS": "--reset-stats --print-stats"
                                                          },
                                                          image=_ecs.ContainerImage.from_registry(

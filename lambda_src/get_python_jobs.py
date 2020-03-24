@@ -49,6 +49,7 @@ def _ddb_put_item(item):
         _ddb_table.put_item(Item=item)
     except Exception as err:
         LOGGER.error(f"DDB write failure. {str(err)}")
+        raise
 
 
 @xray_recorder.capture('_get_github_jobs')
@@ -142,7 +143,7 @@ def lambda_handler(event, context):
     LOGGER.info(_get_random_coder_quote())
     LOGGER.info(_get_random_fox())
     if os.getenv("WIKI_API_ENDPOINT"):
-        xray_recorder.put_annotation("GET_WIKI_API_ENDPOINT", "api_on_lambda")
+        xray_recorder.put_annotation("CALL_LEGACY_APP", "GET_WIKI_URL")
         res = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
         _ddb_put_item(res)
     resp = _get_github_jobs()

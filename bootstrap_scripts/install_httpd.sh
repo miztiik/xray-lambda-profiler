@@ -24,7 +24,7 @@ function install_xray(){
     yum install -y /home/ec2-user/xray.rpm
 }
 
-function install_nginx() {
+function install_nginx(){
     echo 'Begin NGINX Installation'
     sudo amazon-linux-extras install -y nginx1.12
     sudo systemctl start nginx
