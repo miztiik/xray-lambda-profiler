@@ -63,9 +63,7 @@ def _get_github_jobs(skill='python', location='london'):
     }
     resp = {
         "statusCode": 500,
-        "body": {
-            "message": "Internal Mystical Error"
-        }
+        "body": {"message": "Internal Mystical Error"}
     }
     try:
         r1 = requests.get(BASE_URL, params=payload)
@@ -96,10 +94,8 @@ def _get_random_coder_quote():
     payload = {}
     resp = {}
     try:
-        xray_recorder.begin_subsegment('random_quotes_trace')
         resp = requests.get(BASE_URL, params=payload)
         resp = json.loads(resp.text)
-        xray_recorder.end_subsegment()
     except requests.exceptions.RequestException as err:
         resp = {'error_message': str(err)}
     return resp
@@ -109,10 +105,9 @@ def _get_random_coder_quote():
 def _get_wiki_url(endpoint_url):
     BASE_URL = endpoint_url
     payload = {}
-    resp = {
-        "statusCode": 500,
-        "body": {"message": ""}
-    }
+    resp = {"statusCode": 500,
+            "body": {"message": ""}
+            }
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
                   'pallavas', 'sangam_era', 'kural']
     try:
@@ -122,13 +117,13 @@ def _get_wiki_url(endpoint_url):
 
         if _trigger_exception():
             xray_recorder.put_annotation('RANDOM_ERROR', 'True')
-            raise Exception(
-                "RANDOM_ERROR: Simulate Mystique Failure")
+            raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
 
         _info = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp["statusCode"] = 200
         resp["body"]["message"] = _info.text
+        _ddb_put_item(resp)
         xray_recorder.put_metadata('RESPONSE', resp)
     except Exception as err:
         resp["body"]["message"] = str(err)
@@ -145,7 +140,11 @@ def lambda_handler(event, context):
     if os.getenv("WIKI_API_ENDPOINT"):
         xray_recorder.put_annotation("CALL_LEGACY_APP", "GET_WIKI_URL")
         res = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
-        _ddb_put_item(res)
-    resp = _get_github_jobs()
 
+    # Call jobs api only if no error
+    if res["statusCode"] == 500:
+        resp = res
+        LOGGER.error(resp)
+    else:
+        resp = _get_github_jobs()
     return resp

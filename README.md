@@ -49,7 +49,7 @@ As the owner of the application, you would like to know what exactly is the issu
     # Make sure you in root directory
     python3 -m venv .env
     source .env/bin/activate
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 
     The very first time you deploy an AWS CDK app into an environment _(account/region)_, you’ll need to install a `bootstrap stack`, Otherwise just go aheadand   deploy using `cdk deploy`.
