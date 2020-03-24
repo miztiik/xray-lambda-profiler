@@ -2,7 +2,7 @@
 
   ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture.png)
 
-  Consider the scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. Now if you want to find out who long does it take for those calls, then you can use AWS Xray to trace those calls.
+  Consider the scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. If you want to find out how long does it take for each of those calls, you can use AWS Xray to trace those calls.
 
   Trace your lambda function requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them.
 

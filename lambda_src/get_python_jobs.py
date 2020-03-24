@@ -62,12 +62,19 @@ def _get_github_jobs(skill='python', location='london'):
         'skill': random.choice(HOT_SKILLS),
         'location': location
     }
-    resp = {}
+    resp = {
+        "statusCode": 500,
+        "body": {
+            "message": "Internal Mystical Error"
+        }
+    }
     try:
-        resp = requests.get(BASE_URL, params=payload)
-        resp = json.loads(resp.text)
+        r1 = requests.get(BASE_URL, params=payload)
+        r1 = json.loads(r1.text)
+        resp["statusCode"] = 200
+        resp["body"]["message"] = r1.text
     except Exception as err:
-        resp = {'error_message': str(err)}
+        resp["body"]["message"] = str(err)
     return resp
 
 
@@ -125,7 +132,7 @@ def _get_wiki_url(endpoint_url):
         resp["body"]["message"] = url_info.text
         xray_recorder.put_metadata('RESPONSE', resp)
     except Exception as err:
-        resp = {'error_message': str(err)}
+        resp["body"]["message"] = str(err)
     return resp
 
 
@@ -133,13 +140,7 @@ def _get_wiki_url(endpoint_url):
 def lambda_handler(event, context):
     global LOGGER
     LOGGER = set_logging(logging.INFO)
-    resp = {
-        "statusCode": 500,
-        "body": {
-            "message": "Internal Mystical Error"
-        }
-    }
-
+    resp = {}
     LOGGER.info(_get_random_coder_quote())
     LOGGER.info(_get_random_fox())
     if os.getenv("WIKI_API_ENDPOINT"):
