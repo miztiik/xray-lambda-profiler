@@ -45,7 +45,7 @@ class LocustLoadGeneratorStack(core.Stack):
                                                              "github_profile": "https://github.com/miztiik",
                                                              "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": f"--clients={LOAD_PARAMS['NO_OF_CLIENTS']} --hatch-rate{LOAD_PARAMS['HATCH_RATE']} --run-time{LOAD_PARAMS['RUN_TIME']} --no-web --print-stats",
+                                                             "LOCUST_OPTS": f"--clients={LOAD_PARAMS['NO_OF_CLIENTS']} --hatch-rate={LOAD_PARAMS['HATCH_RATE']} --run-time={LOAD_PARAMS['RUN_TIME']} --no-web --print-stats",
                                                              # --clients The number of concurrent Locust users.
                                                              # --hatch-rate The rate per second in which clients are spawned.
                                                              # --run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )
@@ -64,7 +64,6 @@ class LocustLoadGeneratorStack(core.Stack):
             _ecs.PortMapping(container_port=443, protocol=_ecs.Protocol.TCP)
         )
 
-        """
         locust_service = _ecs.FargateService(self, 'locustAppService',
                                              cluster=locust_cluster,
                                              task_definition=locust_task_def,
@@ -91,4 +90,3 @@ class LocustLoadGeneratorStack(core.Stack):
                                   value=f"http://{locust_service.service_name}",
                                   description="Load generation fargate service name"
                                   )
-        """
