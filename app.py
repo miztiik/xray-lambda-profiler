@@ -34,9 +34,9 @@ locust_stack = LocustLoadGeneratorStack(
     vpc=vpc_stack.vpc,
     url=xray_profiler_stack.hot_jobs_api_resource.url,
     LOAD_PARAMS={
-        "NO_OF_CLIENTS": "150",
+        "NO_OF_CLIENTS": "200",
         "HATCH_RATE": "10",
-        "RUN_TIME": "16",
+        "RUN_TIME": "20",
     }
 )
 

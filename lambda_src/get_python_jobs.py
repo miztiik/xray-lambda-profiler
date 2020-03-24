@@ -48,30 +48,28 @@ def _ddb_put_item(item):
     try:
         _ddb_table.put_item(Item=item)
     except Exception as err:
-        LOGGER.error(f"DDB write failure. {str(err)}")
+        LOGGER.info(f"ERROR:{str(err)}")
         raise
 
 
 @xray_recorder.capture('_get_github_jobs')
 def _get_github_jobs(skill='python', location='london'):
     BASE_URL = 'https://jobs.github.com/positions.json'
-    HOT_SKILLS = ['python', 'angular', 'microservices',
-                  'aws', 'containers']
+    HOT_SKILLS = ['python', 'microservices', 'ios', 'aws', 'containers']
     payload = {
         'skill': random.choice(HOT_SKILLS),
         'location': location
     }
     resp = {
-        "statusCode": 500,
+        "statusCode": 501,
         "body": {"message": "Internal Mystical Error"}
     }
     try:
         r1 = requests.get(BASE_URL, params=payload)
-        r1 = json.loads(r1.text)
         resp["statusCode"] = 200
-        resp["body"]["message"] = r1.text
+        resp["body"] = json.dumps({"message": r1.json()})
     except Exception as err:
-        resp["body"]["message"] = str(err)
+        pass
     return resp
 
 
@@ -81,8 +79,8 @@ def _get_random_fox():
     payload = {}
     resp = {}
     try:
-        resp = requests.get(BASE_URL, params=payload)
-        resp = json.loads(resp.text)
+        r1 = requests.get(BASE_URL, params=payload)
+        resp = r1.json()
     except requests.exceptions.RequestException as err:
         resp = {'error_message': str(err)}
     return resp
@@ -94,8 +92,8 @@ def _get_random_coder_quote():
     payload = {}
     resp = {}
     try:
-        resp = requests.get(BASE_URL, params=payload)
-        resp = json.loads(resp.text)
+        r1 = requests.get(BASE_URL, params=payload)
+        resp = r1.json()
     except requests.exceptions.RequestException as err:
         resp = {'error_message': str(err)}
     return resp
@@ -119,14 +117,14 @@ def _get_wiki_url(endpoint_url):
             xray_recorder.put_annotation('RANDOM_ERROR', 'True')
             raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
 
-        _info = requests.get(
+        r1 = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp["statusCode"] = 200
-        resp["body"]["message"] = _info.text
+        resp["body"] = json.dumps({"message": r1.json()})
         _ddb_put_item(resp)
         xray_recorder.put_metadata('RESPONSE', resp)
     except Exception as err:
-        resp["body"]["message"] = str(err)
+        resp["body"] = json.dumps({"message": str(err)})
     return resp
 
 
@@ -136,15 +134,14 @@ def lambda_handler(event, context):
     LOGGER = set_logging(logging.INFO)
     resp = {}
     LOGGER.info(_get_random_coder_quote())
-    LOGGER.info(_get_random_fox())
+    _get_random_fox()
     if os.getenv("WIKI_API_ENDPOINT"):
         xray_recorder.put_annotation("CALL_LEGACY_APP", "GET_WIKI_URL")
-        res = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
-
+        r0 = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
     # Call jobs api only if no error
-    if res["statusCode"] == 500:
-        resp = res
-        LOGGER.error(resp)
+    if r0["statusCode"] == 500:
+        resp = r0
+        LOGGER.info(f"ERROR:{str(resp)}")
     else:
         resp = _get_github_jobs()
     return resp
