@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import logging
 import os
@@ -16,7 +15,6 @@ xray_recorder.configure(service="api_on_lambda", sampling=False)
 
 
 class global_args:
-    OWNER = 'Mystique'
     LOG_LEVEL = logging.INFO
 
 
@@ -50,14 +48,14 @@ def _ddb_put_item(item):
     try:
         _ddb_table.put_item(Item=item)
     except Exception as err:
-        LOGGER.error(f"Unable to write to DDB.{str(err)}")
+        LOGGER.error(f"DDB write failure. {str(err)}")
 
 
 @xray_recorder.capture('_get_github_jobs')
 def _get_github_jobs(skill='python', location='london'):
     BASE_URL = 'https://jobs.github.com/positions.json'
     HOT_SKILLS = ['python', 'angular', 'microservices',
-                  'aws', 'ios', 'containers', 'c']
+                  'aws', 'containers']
     payload = {
         'skill': random.choice(HOT_SKILLS),
         'location': location
@@ -126,10 +124,10 @@ def _get_wiki_url(endpoint_url):
             raise Exception(
                 "RANDOM_ERROR: Simulate Mystique Failure")
 
-        url_info = requests.get(
+        _info = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
         resp["statusCode"] = 200
-        resp["body"]["message"] = url_info.text
+        resp["body"]["message"] = _info.text
         xray_recorder.put_metadata('RESPONSE', resp)
     except Exception as err:
         resp["body"]["message"] = str(err)
