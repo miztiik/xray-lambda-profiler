@@ -9,7 +9,8 @@ class xrayAppTasks(TaskSet):
     @task(1)
     def index(self):
         self.client.get("/")
-        print("Locust instance (%r) executing my_task" % (self.locust))
+        print(f"Locust instance {self.locust} executing index")
+        print(f"Hatch Rate from ENV variable:{os.getenv('HATCH_RATE')}")
         pass
 
     @task(2)

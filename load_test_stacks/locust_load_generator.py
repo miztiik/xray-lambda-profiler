@@ -43,9 +43,12 @@ class LocustFargateStack(core.Stack):
         locust_container = locust_task_def.add_container("locustAppContainer",
                                                          environment={
                                                              "github_profile": "https://github.com/miztiik",
+                                                             "NO_OF_CLIENTS": "150",
+                                                             "HATCH_RATE": "10",
+                                                             "RUN_TIME": "16",
                                                              "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": "--clients=150 --hatch-rate 10 --no-web --run-time=16 --print-stats",
+                                                             "LOCUST_OPTS": "--clients=${NO_OF_CLIENTS} --hatch-rate=${HATCH_RATE} --run-time=${RUN_TIME} --no-web --print-stats",
                                                              # --clients The number of concurrent Locust users.
                                                              # --hatch-rate The rate per second in which clients are spawned.
                                                              # --run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )

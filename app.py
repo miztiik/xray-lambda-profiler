@@ -7,7 +7,7 @@ from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerSt
 from app_stacks.vpc_stack import VpcStack
 from app_stacks.get_wiki_url_stack import getWikiUrlStack
 
-from load_test_stacks.locust_as_container import LocustFargateStack
+from load_test_stacks.locust_load_generator import LocustFargateStack
 
 app = core.App()
 # VPC Stack for hosting EC2 & Other resources
