@@ -1,6 +1,6 @@
 # Profile AWS Lambda Calls using X-ray
 
-  ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture-00.png)
+  ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture-01.png)
 
   Consider the scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. If you want to find out how long does it take for each of those calls, you can use AWS Xray to trace those calls.
 
@@ -69,7 +69,7 @@
     - Goto _AWS XRay_ Service check the service map for latency, errors etc.,
 
     You should be able to notice graphs similar to this,
-    ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture_01.png)
+    ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-results-00.png)
 
     - You can check out the annotations, metadata to gather further insights.
 

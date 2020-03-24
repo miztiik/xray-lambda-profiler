@@ -1,17 +1,11 @@
-[API GW1]-->[Web App|Lambda{bg:wheat}]
+[User]-->[Web App|Lambda{bg:wheat}]
 
 
-[Web App|Lambda{bg:green}]-->[ Method 001{bg:green}]
+[Web App|Lambda{bg:green}]-->[ Process 001{bg:green}]
 
-[Web App|Lambda{bg:green}]-->[ Method 002{bg:green}]
+[Web App|Lambda{bg:green}]-->[ Process 002{bg:green}]
 
-[Web App|Lambda{bg:green}]-->[Method 003{bg:red}]
+[Web App|Lambda{bg:green}]-->[Process 003{bg:red}]
 
-[API GW2]-->[Web App 2|on EC2{bg:wheat}]
-
-
-
-[Web App 2|on EC2{bg:wheat}]-->[ Get Data|API X{bg:orange}]
-
-[Method 003{bg:red}]External-.-*>[API GW]
+[Process 003{bg:red}]External-.-*>[Legacy App|On EC2{bg:orange}]
 
