@@ -14,9 +14,9 @@ class global_args:
     VERSION = '2020_03_23'
 
 
-class LocustFargateStack(core.Stack):
+class LocustLoadGeneratorStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, id: str, vpc: _ec2.IVpc, url: str, tps: int, ** kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, vpc: _ec2.IVpc, url: str, LOAD_PARAMS: dict, ** kwargs) -> None:
         """
         Defines an instance of the traffic generator.
         :param scope: construct scope
@@ -43,12 +43,9 @@ class LocustFargateStack(core.Stack):
         locust_container = locust_task_def.add_container("locustAppContainer",
                                                          environment={
                                                              "github_profile": "https://github.com/miztiik",
-                                                             "NO_OF_CLIENTS": "150",
-                                                             "HATCH_RATE": "10",
-                                                             "RUN_TIME": "16",
                                                              "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": "--clients=${NO_OF_CLIENTS} --hatch-rate=${HATCH_RATE} --run-time=${RUN_TIME} --no-web --print-stats",
+                                                             "LOCUST_OPTS": f"--clients={LOAD_PARAMS['NO_OF_CLIENTS']} --hatch-rate{LOAD_PARAMS['HATCH_RATE']} --run-time{LOAD_PARAMS['RUN_TIME']} --no-web --print-stats",
                                                              # --clients The number of concurrent Locust users.
                                                              # --hatch-rate The rate per second in which clients are spawned.
                                                              # --run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )
@@ -67,6 +64,7 @@ class LocustFargateStack(core.Stack):
             _ecs.PortMapping(container_port=443, protocol=_ecs.Protocol.TCP)
         )
 
+        """
         locust_service = _ecs.FargateService(self, 'locustAppService',
                                              cluster=locust_cluster,
                                              task_definition=locust_task_def,
@@ -93,3 +91,4 @@ class LocustFargateStack(core.Stack):
                                   value=f"http://{locust_service.service_name}",
                                   description="Load generation fargate service name"
                                   )
+        """

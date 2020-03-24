@@ -7,7 +7,7 @@ from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerSt
 from app_stacks.vpc_stack import VpcStack
 from app_stacks.get_wiki_url_stack import getWikiUrlStack
 
-from load_test_stacks.locust_load_generator import LocustFargateStack
+from load_generator_stacks.locust_load_generator import LocustLoadGeneratorStack
 
 app = core.App()
 # VPC Stack for hosting EC2 & Other resources
@@ -29,11 +29,15 @@ xray_profiler_stack = XrayLambdaProfilerStack(
 )
 
 # Deploy Load Testing Tool - Locust Stack
-locust_stack = LocustFargateStack(
-    app, f"locust-load-testing-stack",
+locust_stack = LocustLoadGeneratorStack(
+    app, f"locust-load-generator-stack",
     vpc=vpc_stack.vpc,
     url=xray_profiler_stack.hot_jobs_api_resource.url,
-    tps=1000
+    LOAD_PARAMS={
+        "NO_OF_CLIENTS": "150",
+        "HATCH_RATE": "10",
+        "RUN_TIME": "16",
+    }
 )
 
 # Stack Level Tagging
