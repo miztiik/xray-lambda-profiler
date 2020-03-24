@@ -1,10 +1,12 @@
 # Profile AWS Lambda Calls using X-ray
 
+Let us consider a business running a web application in AWS. As the business is scaling up with more user added to the application, support teams are receiving feedback from their users that the time taken to complete the transactions have increased. The user experience had been impacted because of the delays.
+
+As the owner of the application, you would like to know what exactly is the issue and where is the issue in your application workflow. You would like to know what tools AWS offers to address these issues.
+
   ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-architecture-01.png)
 
-  Consider the scenario, Where there is an lambda function making multiple calls, including a call to an _external_ app to get some data. If you want to find out how long does it take for each of those calls, you can use AWS Xray to trace those calls.
-
-  Trace your lambda function requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them.
+  AWS Xray helps you trace your application requests from beginning to end and generate visual representation of the resources in your application and the connections (edges) between them. In this post, we will see, How to use AWS Xray to trace calls and gain insights to your application
 
   Follow this article in **[Youtube](https://www.youtube.com/c/ValaxyTechnologies)**
 

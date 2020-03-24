@@ -17,5 +17,16 @@ cd /var
 git clone https://github.com/miztiik/xray-lambda-profiler.git
 cd /var/xray-lambda-profiler/app_stacks/front_end/wiki_search
 
-# Start the gunicorn server and log to console
-gunicorn --bind 0.0.0.0:80 wsgi:application --access-logfile - --error-logfile - --capture-output --enable-stdio-inheritance
+
+function install_xray(){
+    # Install AWS XRay Daemon for telemetry
+    curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /home/ec2-user/xray.rpm
+    yum install -y /home/ec2-user/xray.rpm
+}
+
+function install_nginx() {
+    echo 'Begin NGINX Installation'
+    sudo amazon-linux-extras install -y nginx1.12
+    sudo systemctl start nginx
+}
+
