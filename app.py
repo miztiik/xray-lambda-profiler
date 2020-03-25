@@ -36,7 +36,7 @@ locust_stack = LocustLoadGeneratorStack(
     LOAD_PARAMS={
         "NO_OF_CLIENTS": "200",
         "HATCH_RATE": "10",
-        "RUN_TIME": "20",
+        "RUN_TIME": "100",
     }
 )
 

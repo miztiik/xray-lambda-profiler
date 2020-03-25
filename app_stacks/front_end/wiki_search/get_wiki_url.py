@@ -55,9 +55,6 @@ def api(needle='Python_(programming_language)'):
             pg_info['status'] = True
             # AWS XRay Metadata
             xray_recorder.put_metadata('WIKI_QUERY_INFO', pg_info)
-
-        # AWS XRay Annotation
-        xray_recorder.put_annotation("LEGACY_APP_ON_EC2", "END")
     except Exception as e:
         print(str(e))
         pg_info['ERROR'] = str(e)
