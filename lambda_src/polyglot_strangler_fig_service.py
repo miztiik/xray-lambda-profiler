@@ -28,7 +28,7 @@ def set_logging(lv=global_args.LOG_LEVEL):
     return LOGGER
 
 
-@xray_recorder.capture('SLEEPING_AT_WORK')
+@xray_recorder.capture('RANDMOMLY_SLEEPING_AT_WORK')
 def random_sleep(max_seconds=10):
     sleep((random.randint(0, max_seconds) / 10))
 
