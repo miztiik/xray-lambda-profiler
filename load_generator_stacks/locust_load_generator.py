@@ -23,7 +23,7 @@ class LocustLoadGeneratorStack(core.Stack):
         :param id:    construct id
         :param vpc:   the VPC in which to host the traffic generator cluster
         :param url:   the URL to hit
-        :param tps:   the number of transactions per second
+        :param LOAD_PARAMS:   LOCUST load testing parameters
         """
         super().__init__(scope, id, **kwargs)
 
