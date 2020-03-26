@@ -40,7 +40,7 @@ def api(needle='Python_(programming_language)'):
 
     try:
         # AWS XRay Annotation
-        xray_recorder.put_annotation("LEGACY_APP_ON_EC2", "BEGIN")
+        xray_recorder.put_annotation("LEGACY_APP_ON_EC2", "BEGIN_PROCESSING")
 
         _wiki = wikipediaapi.Wikipedia('en')
         _wiki_page = _wiki.page(str(needle))
@@ -59,6 +59,7 @@ def api(needle='Python_(programming_language)'):
         print(str(e))
         pg_info['ERROR'] = str(e)
 
+    # Deliver as web page using HTML/CSS if NEEDED, set using global variable.
     if global_args.RENDER_HTML:
         return render_template("wiki_page.html",
                                _wiki_needle=str(needle),

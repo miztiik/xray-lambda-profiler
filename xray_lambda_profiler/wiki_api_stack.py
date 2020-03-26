@@ -20,13 +20,19 @@ class wikiApiStack(core.Stack):
 
         # Create API Gateway
         api_01 = _apigw.RestApi(self, 'apiEndpoint',
-                                rest_api_name='mystique-wiki-api')
+                                rest_api_name='mystique-wiki-api',
+                                deploy_options=_apigw.StageOptions(
+                                    stage_name="myst",
+                                    data_trace_enabled=True,
+                                    tracing_enabled=True
+                                ))
         v1 = api_01.root.add_resource("v1")
 
         # Add resource for HTTP Endpoint: API Hosted on EC2
         self.wiki_url_path_00 = v1.add_resource('wiki_url')
         wiki_url_path_01 = self.wiki_url_path_00.add_resource('{needle}')
 
+        # Create the API Gateway Integration Responses
         list_objects_responses = [_apigw.IntegrationResponse(status_code="200",
                                                              response_parameters={
                                                                  'method.response.header.Timestamp': 'integration.response.header.Date',
@@ -36,6 +42,7 @@ class wikiApiStack(core.Stack):
                                                              )
                                   ]
 
+        # Create the API Gateway Integration Request Path mapping
         wiki_url_integration_options = _apigw.IntegrationOptions(
             integration_responses=list_objects_responses,
             request_parameters={
@@ -48,6 +55,7 @@ class wikiApiStack(core.Stack):
             options=wiki_url_integration_options,
             proxy=False,
         )
+
         wiki_url_method = wiki_url_path_01.add_method(
             "GET", wiki_url_integration,
             request_parameters={

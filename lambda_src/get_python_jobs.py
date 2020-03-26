@@ -28,6 +28,7 @@ def set_logging(lv=global_args.LOG_LEVEL):
     return LOGGER
 
 
+@xray_recorder.capture('SLEEPING_AT_WORK')
 def random_sleep(max_seconds=10):
     sleep((random.randint(0, max_seconds) / 10))
 
@@ -35,7 +36,7 @@ def random_sleep(max_seconds=10):
 def _trigger_exception():
     r = False
     if os.getenv('TRIGGER_RANDOM_FAILURES', False):
-        if not random.randint(1, 8) % 3:
+        if not random.randint(1, 8) % 2:
             r = True
     return r
 
@@ -48,7 +49,7 @@ def _ddb_put_item(item):
     try:
         _ddb_table.put_item(Item=item)
     except Exception as err:
-        LOGGER.info(f"ERROR:{str(err)}")
+        xray_recorder.put_annotation("DDB_ERRORS", "True")
         raise
 
 
@@ -66,7 +67,7 @@ def _get_github_jobs(skill='python', location='london'):
     }
     try:
         r1 = requests.get(BASE_URL, params=payload)
-        resp["statusCode"] = 200
+        resp["statusCode"] = r1.status_code
         resp["body"] = json.dumps({"message": r1.json()})
     except Exception as err:
         pass
@@ -103,23 +104,22 @@ def _get_random_coder_quote():
 def _get_wiki_url(endpoint_url):
     BASE_URL = endpoint_url
     payload = {}
-    resp = {"statusCode": 500,
+    resp = {"statusCode": 400,
             "body": {"message": ""}
             }
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
                   'pallavas', 'sangam_era', 'kural']
     try:
-        xray_recorder.begin_subsegment('random_sleep')
         random_sleep()
-        xray_recorder.end_subsegment()
-
         if _trigger_exception():
-            xray_recorder.put_annotation('RANDOM_ERROR', 'True')
+            xray_recorder.begin_subsegment("BrittleLegacyApp")
+            d = xray_recorder.current_subsegment()
+            d.put_annotation("SIMULATED_ERRORS", "True")
+            xray_recorder.end_subsegment()
             raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
-
         r1 = requests.get(
             f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
-        resp["statusCode"] = 200
+        resp["statusCode"] = r1.status_code
         resp["body"] = json.dumps({"message": r1.json()})
         _ddb_put_item(resp)
         xray_recorder.put_metadata('RESPONSE', resp)
@@ -135,11 +135,11 @@ def lambda_handler(event, context):
     resp = {}
     LOGGER.info(_get_random_coder_quote())
     _get_random_fox()
+
     if os.getenv("WIKI_API_ENDPOINT"):
-        xray_recorder.put_annotation("CALL_LEGACY_APP", "GET_WIKI_URL")
         r0 = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
     # Call jobs api only if no error
-    if r0["statusCode"] == 500:
+    if r0["statusCode"] == 400:
         resp = r0
         LOGGER.info(f"ERROR:{str(resp)}")
     else:

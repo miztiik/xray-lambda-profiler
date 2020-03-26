@@ -74,6 +74,13 @@ class XrayLambdaProfilerStack(core.Stack):
         # Grant Lambda permissions to write to Dynamodb
         queries_table.grant_read_write_data(get_python_jobs_fn)
 
+        # Enable AWS XRay Tracing at API GW
+        hot_jobs_api_stage_options = _apigw.StageOptions(
+            stage_name="myst",
+            data_trace_enabled=True,
+            tracing_enabled=True
+        )
+
         # Create API Gateway
         hot_jobs_api = _apigw.LambdaRestApi(
             self,
@@ -83,7 +90,8 @@ class XrayLambdaProfilerStack(core.Stack):
             },
             handler=get_python_jobs_fn,
             proxy=False,
-            rest_api_name='mystique-xray-api'
+            rest_api_name='mystique-xray-api',
+            deploy_options=hot_jobs_api_stage_options
         )
 
         self.hot_jobs_api_resource = hot_jobs_api.root.add_resource("hot_jobs")
