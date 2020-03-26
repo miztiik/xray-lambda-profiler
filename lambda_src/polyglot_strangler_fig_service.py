@@ -113,7 +113,7 @@ def _get_wiki_url(endpoint_url):
             xray_recorder.put_annotation("SIMULATED_ERRORS", "True")
             xray_recorder.begin_subsegment("BRITTLE_LEGACY_APP")
             d = xray_recorder.current_subsegment()
-            d.put_annotation("SIMULATED_ERRORS_IN_SUBSEGMENT", "True")
+            d.put_annotation("MANUALLY_TRIGGERRED_IN_SUBSEGMENT", "True")
             xray_recorder.end_subsegment()
             raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
         r1 = requests.get(
