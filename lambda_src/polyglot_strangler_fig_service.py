@@ -45,7 +45,6 @@ def _ddb_put_item(item):
     _ddb = boto3.resource('dynamodb')
     _ddb_table = _ddb.Table(os.environ.get('DDB_TABLE_NAME'))
     item['_id'] = str(uuid.uuid4())
-    LOGGER.info(f"DDB_ITEM:{item}")
     try:
         _ddb_table.put_item(Item=item)
     except Exception as err:
@@ -63,13 +62,14 @@ def _get_github_jobs(skill='python', location='london'):
     }
     resp = {
         "statusCode": 501,
-        "body": {"message": "Internal Mystical Error"}
+        "body":  json.dumps({"message": "Internal Mystical Error"})
     }
     try:
         r1 = requests.get(BASE_URL, params=payload)
         resp["statusCode"] = r1.status_code
         resp["body"] = json.dumps({"message": r1.json()})
     except Exception as err:
+        LOGGER.info(f"ERROR:{str(err)}")
         pass
     return resp
 
@@ -104,17 +104,16 @@ def _get_random_coder_quote():
 def _get_wiki_url(endpoint_url):
     BASE_URL = endpoint_url
     payload = {}
-    resp = {"statusCode": 400,
-            "body": {"message": ""}
-            }
+    resp = {"statusCode": 400}
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
                   'pallavas', 'sangam_era', 'kural']
     try:
         random_sleep()
         if _trigger_exception():
-            xray_recorder.begin_subsegment("BrittleLegacyApp")
+            xray_recorder.put_annotation("SIMULATED_ERRORS", "True")
+            xray_recorder.begin_subsegment("BRITTLE_LEGACY_APP")
             d = xray_recorder.current_subsegment()
-            d.put_annotation("SIMULATED_ERRORS", "True")
+            d.put_annotation("SIMULATED_ERRORS_IN_SUBSEGMENT", "True")
             xray_recorder.end_subsegment()
             raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
         r1 = requests.get(
@@ -138,7 +137,7 @@ def lambda_handler(event, context):
 
     if os.getenv("WIKI_API_ENDPOINT"):
         r0 = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
-    # Call jobs api only if no error
+
     if r0["statusCode"] == 400:
         resp = r0
         LOGGER.info(f"ERROR:{str(resp)}")

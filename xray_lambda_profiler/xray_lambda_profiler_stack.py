@@ -50,15 +50,16 @@ class XrayLambdaProfilerStack(core.Stack):
                                               )
 
         # Defines an AWS Lambda resource
-        with open("lambda_src/get_python_jobs.py", encoding="utf8") as fp:
-            get_python_jobs_fn_handler_code = fp.read()
+        with open("lambda_src/polyglot_strangler_fig_service.py", encoding="utf8") as fp:
+            polyglot_strangler_fig_service_fn_handler_code = fp.read()
 
-        get_python_jobs_fn = _lambda.Function(
+        polyglot_strangler_fig_service_fn = _lambda.Function(
             self,
-            id='getPythonJobsFn',
-            function_name="get_python_jobs_fn",
+            id='polyglotStranglerFigService',
+            function_name="polyglot_strangler_fig_service_fn",
             runtime=_lambda.Runtime.PYTHON_3_7,
-            code=_lambda.InlineCode(get_python_jobs_fn_handler_code),
+            code=_lambda.InlineCode(
+                polyglot_strangler_fig_service_fn_handler_code),
             handler='index.lambda_handler',
             timeout=core.Duration.seconds(300),
             environment={
@@ -72,30 +73,31 @@ class XrayLambdaProfilerStack(core.Stack):
         )
 
         # Grant Lambda permissions to write to Dynamodb
-        queries_table.grant_read_write_data(get_python_jobs_fn)
+        queries_table.grant_read_write_data(polyglot_strangler_fig_service_fn)
 
         # Enable AWS XRay Tracing at API GW
-        hot_jobs_api_stage_options = _apigw.StageOptions(
+        polyglot_svc_api_stage_options = _apigw.StageOptions(
             stage_name="myst",
             data_trace_enabled=True,
             tracing_enabled=True
         )
 
         # Create API Gateway
-        hot_jobs_api = _apigw.LambdaRestApi(
+        polyglot_svc_api = _apigw.LambdaRestApi(
             self,
-            'hotJobsApi',
+            'polyglotStranglerFigServiceApi',
             default_cors_preflight_options={
                 "allow_origins": _apigw.Cors.ALL_ORIGINS
             },
-            handler=get_python_jobs_fn,
+            handler=polyglot_strangler_fig_service_fn,
             proxy=False,
             rest_api_name='mystique-xray-api',
-            deploy_options=hot_jobs_api_stage_options
+            deploy_options=polyglot_svc_api_stage_options
         )
 
-        self.hot_jobs_api_resource = hot_jobs_api.root.add_resource("hot_jobs")
-        self.hot_jobs_api_resource.add_method("GET")
+        self.polyglot_svc_api_resource = polyglot_svc_api.root.add_resource(
+            "polyglot_svc")
+        self.polyglot_svc_api_resource.add_method("GET")
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
@@ -104,7 +106,7 @@ class XrayLambdaProfilerStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
-                                  'HottestJobs',
-                                  value=f'{self.hot_jobs_api_resource.url}',
-                                  description=f'Get the jobs openings for HOTTEST SKILLS from Github'
+                                  'PolyglotServiceApi',
+                                  value=f'{self.polyglot_svc_api_resource.url}',
+                                  description=f'Call the polyglot API'
                                   )
