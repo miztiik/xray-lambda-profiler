@@ -69,7 +69,7 @@ def _get_github_jobs(skill='python', location='london'):
         resp["statusCode"] = r1.status_code
         resp["body"] = json.dumps({"message": r1.json()})
     except Exception as err:
-        LOGGER.info(f"ERROR:{str(err)}")
+        LOGGER.exception(f"{str(err)}")
         pass
     return resp
 
@@ -80,8 +80,7 @@ def _get_random_fox():
     payload = {}
     resp = {}
     try:
-        r1 = requests.get(BASE_URL, params=payload)
-        resp = r1.json()
+        requests.get(BASE_URL, params=payload)
     except requests.exceptions.RequestException as err:
         resp = {'error_message': str(err)}
     return resp
@@ -93,8 +92,7 @@ def _get_random_coder_quote():
     payload = {}
     resp = {}
     try:
-        r1 = requests.get(BASE_URL, params=payload)
-        resp = r1.json()
+        resp = json.dumps(requests.get(BASE_URL, params=payload).json())
     except requests.exceptions.RequestException as err:
         resp = {'error_message': str(err)}
     return resp
@@ -143,4 +141,5 @@ def lambda_handler(event, context):
         LOGGER.info(f"ERROR:{str(resp)}")
     else:
         resp = _get_github_jobs()
+    LOGGER.info(resp)
     return resp
