@@ -20,7 +20,7 @@ def lambda_handler(event, context):
         LOGGGER.info(f'Input event: {event}')
 
         # Check if this is a Create and we're failing Creates
-        if event['RequestType'] == 'Create' and event['ResourceProperties'].get('FailCreate', False):
+        if event['RequestType'] == 'Create' and event['ResourceProperties'].get('FailCreate', False) or event['RequestType'] == 'Delete':
             LOGGGER.info('Create failure requested by SINGLEtonneeeeee')
             raise RuntimeError('Create failure requested')
 
