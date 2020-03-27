@@ -35,9 +35,10 @@ locust_stack = LocustLoadGeneratorStack(
     vpc=vpc_stack.vpc,
     url=xray_profiler_stack.polyglot_svc_api_resource.url,
     LOAD_PARAMS={
-        "NO_OF_CLIENTS": "200",
-        "HATCH_RATE": "10",
-        "RUN_TIME": "100",
+        "NO_OF_CLIENTS": "10",
+        "HATCH_RATE": "1",
+        "RUN_TIME": "5",
+        "NO_OF_TASKS": "2"
     }
 )
 

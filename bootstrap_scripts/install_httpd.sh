@@ -17,8 +17,10 @@ cd /var
 git clone https://github.com/miztiik/xray-lambda-profiler.git
 cd /var/xray-lambda-profiler/app_stacks/back_end/wiki_search
 # Start the App Server to receive traffic
-gunicorn --bind 0.0.0.0:80 wsgi:application --access-logfile - --error-logfile - --capture-output --enable-stdio-inheritance
+gunicorn --bind 0.0.0.0:80 wsgi:application --access-logfile - --error-logfile - --capture-output --enable-stdio-inheritance &
 
+# Killing gunicorn
+# kill $(ps aux | grep 'gunicorn' | awk '{print $2}')
 
 function install_xray(){
     # Install AWS XRay Daemon for telemetry

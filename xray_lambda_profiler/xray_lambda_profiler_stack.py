@@ -61,7 +61,7 @@ class XrayLambdaProfilerStack(core.Stack):
             code=_lambda.InlineCode(
                 polyglot_strangler_fig_service_fn_handler_code),
             handler='index.lambda_handler',
-            timeout=core.Duration.seconds(300),
+            timeout=core.Duration.seconds(59),
             environment={
                 'LD_LIBRARY_PATH': '/opt/python',
                 'WIKI_API_ENDPOINT': wiki_api_endpoint,

@@ -33,14 +33,12 @@ As the owner of the application, you would like to know what exactly is the issu
 1. ## 🚀 Resource Deployment using AWS CDK
 
     The cdk stack provided in the repo will create the following resources,
-    - VPC with public & private subnets, route table for private subnet
+    - VPC with public & private subnets, route tables, security group and nacl.
     - API GW to front end Application running inside Lambda
         - Lambda Layers for dependent binaries
         - S3 Bucket to host Lambda Layer code
     - 3<sup>rd</sup> Party Data Provider App on EC2 running inside public subnet
         - Another API GW front-ending our EC2 App
-
-    **Note**: _Most of the resources should be covered under the aws free tier, except the NAT Gateway. You can swap it out for a NAT Instance_.
 
     ```bash
     # If you DONT have cdk installed
@@ -82,6 +80,7 @@ As the owner of the application, you would like to know what exactly is the issu
     - Resources created during [deployment](#🚀-resource-deployment-using-aws-cdk)
     - Destroy Locust stack, if deployed
     - Delete CloudWatch Lambda LogGroups
+    - Delete DynamoDB Table
     - _Any other custom resources, you have created for this demo_
 
     ```bash
@@ -106,6 +105,7 @@ As the owner of the application, you would like to know what exactly is the issu
 1. [AWS Blog](https://aws.amazon.com/blogs/aws/aws-lambda-support-for-aws-x-ray/)
 1. [Xray Gotchas](https://read.acloud.guru/im-here-to-tell-you-the-truth-the-good-the-bad-and-the-ugly-of-aws-x-ray-and-lambda-f212b5f332e9)
 1. [AWS Xray Sample](https://docs.aws.amazon.com/xray/latest/devguide/scorekeep-lambda.html#scorekeep-lambda-worker)
+1. [AWS Xray Filter Pattern](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html)
 1. [AWS Xray Daemon Installation](https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ec2.html)
 1. [AWS Xray Daemon Permissions](https://docs.aws.amazon.com/xray/latest/devguide/security_iam_service-with-iam.html)
 1. [Open APIs](https://github.com/public-apis/public-apis)

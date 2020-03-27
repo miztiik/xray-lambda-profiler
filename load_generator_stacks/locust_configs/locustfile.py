@@ -13,13 +13,13 @@ class xrayAppTasks(TaskSet):
         pass
 
     @task(2)
-    def get_hot_jobs(self):
+    def polyglot_svc(self):
         # Add containers
         # headers={'X-Requested-With': 'XMLHttpRequest'})
         url_suffix = f"/"
         # Statistics for these requests will be grouped under: hot_jobs
-        self.client.get(url_suffix, name="hot_jobs")
-        print(f"Running 'get_hot_jobs'")
+        self.client.get(url_suffix, name="polyglot_svc")
+        print(f"Running 'polyglot_svc'")
 
 
 class WebsiteUser(HttpLocust):

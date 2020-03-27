@@ -24,24 +24,35 @@ class global_args:
     REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
     DEBUG_MODE = False
-    RENDER_HTML = False
+    # RENDER_HTML = False
 
 
 @application.route('/')
 def index():
-    return redirect('/api/Python_(programming_language)')
+    # return redirect('/api/Python_(programming_language)')
+    return redirect('/home')
+
+
+@application.route('/home/')
+@application.route('/home/<needle>')
+def home(needle='Mystique', RENDER_HTML=True):
+    resp = get_wiki_data(needle=needle, RENDER_HTML=RENDER_HTML)
+    return resp
 
 
 @application.route('/api/<needle>')
-def api(needle='Python_(programming_language)'):
+def api(needle='Python_(programming_language)', RENDER_HTML=False):
+    resp = get_wiki_data(needle=needle, RENDER_HTML=RENDER_HTML)
+    return resp
 
+
+def get_wiki_data(needle='Python_(programming_language)', RENDER_HTML=False):
     # resp = {'statusCode': 404, }
     pg_info = {'status': False}
 
     try:
         # AWS XRay Annotation
         xray_recorder.put_annotation("LEGACY_APP_ON_EC2", "BEGIN_PROCESSING")
-
         _wiki = wikipediaapi.Wikipedia('en')
         _wiki_page = _wiki.page(str(needle))
 
@@ -60,7 +71,7 @@ def api(needle='Python_(programming_language)'):
         pg_info['ERROR'] = str(e)
 
     # Deliver as web page using HTML/CSS if NEEDED, set using global variable.
-    if global_args.RENDER_HTML:
+    if RENDER_HTML:
         return render_template("wiki_page.html",
                                _wiki_needle=str(needle),
                                _wiki_page_info=pg_info
