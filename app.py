@@ -43,7 +43,7 @@ locust_stack = LocustLoadGeneratorStack(
     LOAD_PARAMS={
         "NO_OF_CLIENTS": "10",
         "HATCH_RATE": "1",
-        "RUN_TIME": "5",
+        "RUN_TIME": "10",
         "NO_OF_TASKS": "2"
     },
     description="Deploy Load Testing Tool - Locust Stack"

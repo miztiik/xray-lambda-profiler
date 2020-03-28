@@ -17,7 +17,7 @@ class global_args:
     REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
     VERSION = '2020_03_28'
-    POLYGLOT_SUPPORT_EMAIL = 'mystique@example.com'
+    POLYGLOT_SUPPORT_EMAIL = ['mystique@example.com', ]
 
 
 class XrayLambdaProfilerStack(core.Stack):
@@ -128,11 +128,12 @@ class XrayLambdaProfilerStack(core.Stack):
         polyglot_svc_fn_error_alarm = polyglot_svc_fn.metric_errors().create_alarm(self, "polglotSvcAlarm",
                                                                                    alarm_name="polyglot_svc_fn_error_alarm",
                                                                                    threshold=10,
-                                                                                   evaluation_periods=5,
+                                                                                   evaluation_periods=2,
                                                                                    period=core.Duration.minutes(
                                                                                        1),
                                                                                    treat_missing_data=_cloudwatch.TreatMissingData.IGNORE
                                                                                    )
+
         # SNS For Alerts for Polyglot Service
         polyglot_svc_support_topic = _sns.Topic(self, "polyglotSvcTopic",
                                                 display_name="PolyglotSvc",
@@ -140,8 +141,13 @@ class XrayLambdaProfilerStack(core.Stack):
                                                 )
 
         # Subscribe Polyglot Service Team Email to topic
-        polyglot_svc_support_topic.add_subscription(
-            _subs.EmailSubscription(global_args.POLYGLOT_SUPPORT_EMAIL))
+        for email in global_args.POLYGLOT_SUPPORT_EMAIL:
+            polyglot_svc_support_topic.add_subscription(
+                _subs.EmailSubscription(email_address=email)
+            )
+
+        # polyglot_svc_support_topic.add_subscription(
+        #     _subs.EmailSubscription(global_args.POLYGLOT_SUPPORT_EMAIL))
 
         # Add the topic to the Alarm
         polyglot_svc_fn_error_alarm.add_alarm_action(
@@ -152,24 +158,32 @@ class XrayLambdaProfilerStack(core.Stack):
                                                        id="polyglotSvcDashboard",
                                                        dashboard_name="Polyglot-Svc"
                                                        )
-        """
-        polyglot_svc_dashboard = _cloudwatch.dashboard.add_widgets(
-            GraphWidget(
-                title="Executions vs error rate",
-                left=[execution_count_metric],
-                right=[error_count_metric.with(
-                    statistic="average",
-                    label="Error rate",
-                    color=Color.GREEN
-                )]
-            ))
-        """
+
+        polyglot_svc_fn_invocation_metric = polyglot_svc_fn.metric_invocations(
+            label="Invocations",
+            period=core.Duration.minutes(1),
+            statistic="Sum"
+        )
 
         polyglot_svc_dashboard.add_widgets(
             _cloudwatch.AlarmWidget(
                 title="Lambda-Errors",
                 alarm=polyglot_svc_fn_error_alarm
             )
+        )
+
+        polyglot_svc_dashboard.add_widgets(
+            # TODO: here monitor all lambda concurrency not just the working one. Limitation from CDK
+            # Lambda now supports monitor single lambda concurrency, will change this after CDK support
+            _cloudwatch.GraphWidget(title="Lambda-all-concurrent",
+                                    left=[polyglot_svc_fn.metric_all_concurrent_executions(statistic="Sum", period=core.Duration.minutes(1), color=_cloudwatch.Color.GREEN)]),
+            _cloudwatch.GraphWidget(title="Lambda-invocations/errors/throttles",
+                                    left=[polyglot_svc_fn.metric_invocations(statistic="Sum", period=core.Duration.minutes(1)),
+                                          polyglot_svc_fn.metric_errors(
+                                              statistic="Sum", period=core.Duration.minutes(1), color=_cloudwatch.Color.RED),
+                                          polyglot_svc_fn.metric_throttles(statistic="Sum", period=core.Duration.minutes(1), color=_cloudwatch.Color.ORANGE)]),
+            _cloudwatch.GraphWidget(title="Lambda-duration",
+                                    left=[polyglot_svc_fn.metric_duration(statistic="Average", period=core.Duration.minutes(1))]),
         )
 
         ###########################################
