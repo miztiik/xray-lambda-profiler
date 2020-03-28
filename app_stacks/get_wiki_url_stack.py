@@ -9,7 +9,7 @@ class global_args:
     '''
     OWNER = 'MystiqueAutomation'
     ENVIRONMENT = 'production'
-    REPO_NAME = 'xray-lambda-profiler'
+    REPO_NAME = 'xray-cdk-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
     VERSION = '2020_03_21'
 
@@ -19,7 +19,7 @@ class getWikiUrlStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, vpc, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # Read BootStrap Script
+        # Read BootStrap Script):
         try:
             with open("bootstrap_scripts/install_httpd.sh", mode="r") as file:
                 user_data = file.read()
@@ -77,7 +77,9 @@ class getWikiUrlStack(core.Stack):
         self.web_app_server.connections.allow_from_any_ipv4(
             _ec2.Port.tcp(443), description="Allow Secured Web Traffic"
         )
-
+        ###########################################
+        ################# OUTPUTS #################
+        ###########################################
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
                                   value=f"{global_args.SOURCE_INFO}",
@@ -85,7 +87,12 @@ class getWikiUrlStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
-                                  "ApplicationServer",
+                                  "ApplicationServerUrl",
                                   value=f'http://{self.web_app_server.instance_public_ip}/api/mystique',
-                                  description=f"This instance serves the wiki url for a given search keyword"
+                                  description=f"This instance serves the wiki url for a given search keyword, http://<EC_IP_ADDRESS>/api/<SEARCH_TERM>"
+                                  )
+        output_2 = core.CfnOutput(self,
+                                  "LegacyServerUrl",
+                                  value=f'http://{self.web_app_server.instance_public_ip}/home/mystique',
+                                  description=f"This instance serves the wiki url for a given search keyword, http://<EC_IP_ADDRESS>/home/<SEARCH_TERM>"
                                   )

@@ -20,9 +20,16 @@ def lambda_handler(event, context):
         LOGGGER.info(f'Input event: {event}')
 
         # Check if this is a Create and we're failing Creates
-        if event['RequestType'] == 'Create' and event['ResourceProperties'].get('FailCreate', False) or event['RequestType'] == 'Delete':
+        if event['RequestType'] == 'Create' and event['ResourceProperties'].get('FailCreate', False):
             LOGGGER.info('Create failure requested by SINGLEtonneeeeee')
             raise RuntimeError('Create failure requested')
+        if event['RequestType'] == 'Delete':
+            attributes = {
+                'Response': f"All Good, Lets Delete it"
+            }
+            cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                             attributes, physical_id)
+            return None
 
         # Do the thing
         message = event['ResourceProperties']['Message']

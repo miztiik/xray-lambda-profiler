@@ -14,8 +14,11 @@ find . -type d -name "__pycache__" -exec rm -rfv {} +
 rm -r *.whl *.dist-info __pycache__
 
 
+
+
 cd ..
 zip -r9 -q aws_xray_python_37.zip ./python 
+# zip -r9 -q aws_xray_python_37.zip . -x \*.pyc ./python/pip\* ./python/setuptools\* ./python/wheel\* ./base_pkg\*
 
 aws s3 cp aws_xray_python_37.zip s3://$S3_BUCKET/laws_xray_python_37.zip --profile elf
 

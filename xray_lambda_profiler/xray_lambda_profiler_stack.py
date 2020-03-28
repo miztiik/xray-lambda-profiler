@@ -1,7 +1,11 @@
-from aws_cdk import core
-from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_apigateway as _apigw
+from aws_cdk import aws_cloudwatch as _cloudwatch
+from aws_cdk import aws_cloudwatch_actions as _cw_actions
 from aws_cdk import aws_dynamodb as _dynamodb
+from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_sns as _sns
+from aws_cdk import aws_sns_subscriptions as _subs
+from aws_cdk import core
 
 
 class global_args:
@@ -12,7 +16,8 @@ class global_args:
     ENVIRONMENT = 'production'
     REPO_NAME = 'xray-lambda-profiler'
     SOURCE_INFO = f'https://github.com/miztiik/{REPO_NAME}'
-    VERSION = '2020_03_21'
+    VERSION = '2020_03_28'
+    POLYGLOT_SUPPORT_EMAIL = 'mystique@example.com'
 
 
 class XrayLambdaProfilerStack(core.Stack):
@@ -20,7 +25,7 @@ class XrayLambdaProfilerStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, wiki_api_endpoint, ** kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # DynamodDB Table
+        # DynamodDB Table(TODO:Create re-usable data model):
         queries_table = _dynamodb.Table(self, "queriesDataTable",
                                         partition_key=_dynamodb.Attribute(
                                             name="_id", type=_dynamodb.AttributeType.STRING)
@@ -50,16 +55,16 @@ class XrayLambdaProfilerStack(core.Stack):
                                               )
 
         # Defines an AWS Lambda resource
-        with open("lambda_src/polyglot_strangler_fig_service.py", encoding="utf8") as fp:
-            polyglot_strangler_fig_service_fn_handler_code = fp.read()
+        with open("lambda_src/polyglot_strangler_fig_svc.py", encoding="utf8") as fp:
+            polyglot_svc_fn_handler_code = fp.read()
 
-        polyglot_strangler_fig_service_fn = _lambda.Function(
+        polyglot_svc_fn = _lambda.Function(
             self,
             id='polyglotStranglerFigService',
-            function_name="polyglot_strangler_fig_service_fn",
+            function_name="polyglot_svc_fn",
             runtime=_lambda.Runtime.PYTHON_3_7,
             code=_lambda.InlineCode(
-                polyglot_strangler_fig_service_fn_handler_code),
+                polyglot_svc_fn_handler_code),
             handler='index.lambda_handler',
             timeout=core.Duration.seconds(59),
             environment={
@@ -71,9 +76,10 @@ class XrayLambdaProfilerStack(core.Stack):
             layers=[aws_xray_layer, requests_layer],
             tracing=_lambda.Tracing.ACTIVE
         )
-
         # Grant Lambda permissions to write to Dynamodb
-        queries_table.grant_read_write_data(polyglot_strangler_fig_service_fn)
+        queries_table.grant_read_write_data(polyglot_svc_fn)
+
+        ##### PUBLISH TO API GW ######
 
         # Enable AWS XRay Tracing at API GW
         polyglot_svc_api_stage_options = _apigw.StageOptions(
@@ -83,21 +89,92 @@ class XrayLambdaProfilerStack(core.Stack):
         )
 
         # Create API Gateway
-        polyglot_svc_api = _apigw.LambdaRestApi(
-            self,
-            'polyglotStranglerFigServiceApi',
-            default_cors_preflight_options={
-                "allow_origins": _apigw.Cors.ALL_ORIGINS
-            },
-            handler=polyglot_strangler_fig_service_fn,
-            proxy=False,
-            rest_api_name='mystique-xray-api',
-            deploy_options=polyglot_svc_api_stage_options
+        api_01 = _apigw.RestApi(self, 'polglotApiEndpoint',
+                                rest_api_name='mystique-xray-tracer-api',
+                                deploy_options=polyglot_svc_api_stage_options)
+
+        v1 = api_01.root.add_resource("polyglot_svc")
+
+        # Add resource for HTTP Endpoint: API Hosted on EC2
+        polyglot_svc_api_resource_00 = v1.add_resource('wiki')
+        self.polyglot_svc_api_resource_01 = polyglot_svc_api_resource_00.add_resource(
+            '{query}')
+
+        polyglot_svc_api_lambda_integration = _apigw.LambdaIntegration(
+            handler=polyglot_svc_fn,
+            proxy=True,
+            integration_responses=[{"statusCode": "200"}],
+            request_parameters={
+                "integration.request.path.query": "method.request.path.query"}
         )
 
-        self.polyglot_svc_api_resource = polyglot_svc_api.root.add_resource(
-            "polyglot_svc")
-        self.polyglot_svc_api_resource.add_method("GET")
+        self.polyglot_svc_api_resource_01.add_method(
+            http_method="GET",
+            integration=polyglot_svc_api_lambda_integration,
+            method_responses=[{"statusCode": "200"}],
+            request_parameters={
+                'method.request.header.Content-Type': False,
+                'method.request.path.query': True
+            }
+        )
+
+        ##### MONITORING ######
+
+        # Now let us create alarms for our Lambda Function
+        # alarm is raised there are more than 5(threshold) of the measured metrics in two(datapoint) of the last three seconds(evaluation):
+        # Period=60Seconds, Eval=3, Threshold=5
+        # metric_errors(): How many invocations of this Lambda fail.
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_lambda/Function.html
+        polyglot_svc_fn_error_alarm = polyglot_svc_fn.metric_errors().create_alarm(self, "polglotSvcAlarm",
+                                                                                   alarm_name="polyglot_svc_fn_error_alarm",
+                                                                                   threshold=10,
+                                                                                   evaluation_periods=5,
+                                                                                   period=core.Duration.minutes(
+                                                                                       1),
+                                                                                   treat_missing_data=_cloudwatch.TreatMissingData.IGNORE
+                                                                                   )
+        # SNS For Alerts for Polyglot Service
+        polyglot_svc_support_topic = _sns.Topic(self, "polyglotSvcTopic",
+                                                display_name="PolyglotSvc",
+                                                topic_name="polyglotSvcSupportTopic"
+                                                )
+
+        # Subscribe Polyglot Service Team Email to topic
+        polyglot_svc_support_topic.add_subscription(
+            _subs.EmailSubscription(global_args.POLYGLOT_SUPPORT_EMAIL))
+
+        # Add the topic to the Alarm
+        polyglot_svc_fn_error_alarm.add_alarm_action(
+            _cw_actions.SnsAction(polyglot_svc_support_topic))
+
+        # Create CloudWatch Dashboard for Polyglot Service Team
+        polyglot_svc_dashboard = _cloudwatch.Dashboard(self,
+                                                       id="polyglotSvcDashboard",
+                                                       dashboard_name="Polyglot-Svc"
+                                                       )
+        """
+        polyglot_svc_dashboard = _cloudwatch.dashboard.add_widgets(
+            GraphWidget(
+                title="Executions vs error rate",
+                left=[execution_count_metric],
+                right=[error_count_metric.with(
+                    statistic="average",
+                    label="Error rate",
+                    color=Color.GREEN
+                )]
+            ))
+        """
+
+        polyglot_svc_dashboard.add_widgets(
+            _cloudwatch.AlarmWidget(
+                title="Lambda-Errors",
+                alarm=polyglot_svc_fn_error_alarm
+            )
+        )
+
+        ###########################################
+        ################# OUTPUTS #################
+        ###########################################
 
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
@@ -106,7 +183,7 @@ class XrayLambdaProfilerStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
-                                  'PolyglotServiceApi',
-                                  value=f'{self.polyglot_svc_api_resource.url}',
+                                  'PolyglotServiceApiUrl',
+                                  value=f'{self.polyglot_svc_api_resource_01.url}',
                                   description=f'Call the polyglot API'
                                   )

@@ -49,7 +49,7 @@ def lambda_handler(event, context):
 
     client = boto3.client('ecs')
 
-    r2 = client.run_task(
+    r1 = client.run_task(
         cluster=os.getenv("CLUSTER_NAME"),
         launchType="FARGATE",
         taskDefinition=os.getenv("TASK_DEFINITION"),
@@ -60,9 +60,12 @@ def lambda_handler(event, context):
                 "subnets": json.loads(os.getenv("SUBNETS")),
                 "assignPublicIp": "ENABLED"
             }
-        })
-    LOGGER.info(r2)
-    return str(r2)
+        },
+        startedBy=f"{global_args.OWNER}-Automation"
+    )
+    LOGGER.info(r1)
+
+    return str(r1)
 
 
 if __name__ == '__main__':

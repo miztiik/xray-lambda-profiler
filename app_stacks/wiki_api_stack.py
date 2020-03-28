@@ -18,7 +18,7 @@ class wikiApiStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, wiki_api_endpoint, ** kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # Create API Gateway
+        # Create API Gateway):
         api_01 = _apigw.RestApi(self, 'apiEndpoint',
                                 rest_api_name='mystique-wiki-api',
                                 deploy_options=_apigw.StageOptions(
@@ -74,7 +74,9 @@ class wikiApiStack(core.Stack):
                                                     )
                               ]
         )
-
+        ###########################################
+        ################# OUTPUTS #################
+        ###########################################
         output_0 = core.CfnOutput(self,
                                   "AutomationFrom",
                                   value=f"{global_args.SOURCE_INFO}",
@@ -82,13 +84,13 @@ class wikiApiStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
-                                  "APIGatewayUrl",
+                                  "APIGateway",
                                   value=f'{api_01.url}',
-                                  description=f"This url to query for hottest python jobs"
+                                  description=f"This root domain for the API Gateway"
                                   )
 
         output_2 = core.CfnOutput(self,
-                                  "GetWiki",
-                                  value=f'{self.wiki_url_path_00.url}',
-                                  description=f'Get Wiki Url for given topic'
+                                  "GetWikiUrl",
+                                  value=f"{self.wiki_url_path_00.url}",
+                                  description=f"Get Wiki Url for given topic using API Gateway"
                                   )

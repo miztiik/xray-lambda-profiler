@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import random
 import uuid
@@ -14,29 +13,16 @@ patch_all()
 xray_recorder.configure(service="api_on_lambda", sampling=False)
 
 
-class global_args:
-    LOG_LEVEL = logging.INFO
-
-
-def set_logging(lv=global_args.LOG_LEVEL):
-    '''
-    Helper to enable logging
-    '''
-    logging.basicConfig(level=lv)
-    LOGGER = logging.getLogger()
-    LOGGER.setLevel(lv)
-    return LOGGER
-
-
-@xray_recorder.capture('RANDMOMLY_SLEEPING_AT_WORK')
+@xray_recorder.capture('LATENCY_GENERATING_SVC')
 def random_sleep(max_seconds=10):
+    xray_recorder.put_annotation("RANDMOMLY_SLEEP_AT_WORK", "True")
     sleep((random.randint(0, max_seconds) / 10))
 
 
 def _trigger_exception():
     r = False
     if os.getenv('TRIGGER_RANDOM_FAILURES', False):
-        if not random.randint(1, 8) % 2:
+        if not random.randint(1, 8) % 3:
             r = True
     return r
 
@@ -47,8 +33,8 @@ def _ddb_put_item(item):
     item['_id'] = str(uuid.uuid4())
     try:
         _ddb_table.put_item(Item=item)
-    except Exception as err:
-        xray_recorder.put_annotation("DDB_ERRORS", "True")
+    except Exception as e:
+        xray_recorder.put_annotation("DDB_ERROR", "True")
         raise
 
 
@@ -62,15 +48,13 @@ def _get_github_jobs(skill='python', location='london'):
     }
     resp = {
         "statusCode": 501,
-        "body":  json.dumps({"message": "Internal Mystical Error"})
+        "body":  {"message": "Internal Mystical Error"}
     }
     try:
-        r1 = requests.get(BASE_URL, params=payload)
-        resp["statusCode"] = r1.status_code
-        resp["body"] = json.dumps({"message": r1.json()})
-    except Exception as err:
-        LOGGER.exception(f"{str(err)}")
-        pass
+        print(
+            f"Git_resp:{requests.get(BASE_URL, params=payload).status_code}")
+    except Exception as er:
+        print(f"{str(er)}")
     return resp
 
 
@@ -93,18 +77,23 @@ def _get_random_coder_quote():
     resp = {}
     try:
         resp = json.dumps(requests.get(BASE_URL, params=payload).json())
-    except requests.exceptions.RequestException as err:
-        resp = {'error_message': str(err)}
+    except requests.exceptions.RequestException as e:
+        resp = {'error_message': str(e)}
     return resp
 
 
 @xray_recorder.capture('_get_wiki_url')
-def _get_wiki_url(endpoint_url):
-    BASE_URL = endpoint_url
+def _get_wiki_url(_url, q):
+    BASE_URL = _url
     payload = {}
     resp = {"statusCode": 400}
     HOT_TOPICS = ['cholas', 'cheras', 'pandyas',
                   'pallavas', 'sangam_era', 'kural']
+    if q:
+        q = q.split('/')[-1]
+    else:
+        q = random.choice(HOT_TOPICS)
+
     try:
         random_sleep()
         if _trigger_exception():
@@ -115,31 +104,32 @@ def _get_wiki_url(endpoint_url):
             xray_recorder.end_subsegment()
             raise Exception("RANDOM_ERROR: Simulate Mystique Failure")
         r1 = requests.get(
-            f'{BASE_URL}/{random.choice(HOT_TOPICS)}', params=payload)
-        resp["statusCode"] = r1.status_code
-        resp["body"] = json.dumps({"message": r1.json()})
-        _ddb_put_item(resp)
+            f'{BASE_URL}/{q}', params=payload)
         xray_recorder.put_metadata('RESPONSE', resp)
-    except Exception as err:
-        resp["body"] = json.dumps({"message": str(err)})
+        resp["statusCode"] = r1.status_code
+        z = r1.json()
+        resp["body"] = json.dumps({"message": z["body"]["message"]})
+        _ddb_put_item(resp)
+    except Exception as e:
+        resp["body"] = json.dumps({"message": str(e)})
     return resp
 
 
 @xray_recorder.capture('lambda_handler')
 def lambda_handler(event, context):
-    global LOGGER
-    LOGGER = set_logging(logging.INFO)
     resp = {}
-    LOGGER.info(_get_random_coder_quote())
+    print(event)
+    print(_get_random_coder_quote())
     _get_random_fox()
+    r1 = _get_github_jobs()
 
     if os.getenv("WIKI_API_ENDPOINT"):
-        r0 = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"))
-
-    if r0["statusCode"] == 400:
-        resp = r0
-        LOGGER.info(f"ERROR:{str(resp)}")
-    else:
-        resp = _get_github_jobs()
-    LOGGER.info(resp)
+        q = event.get('path')
+        r2 = _get_wiki_url(os.getenv("WIKI_API_ENDPOINT"), q)
+        r2.pop("_id", None)
+    if r2["statusCode"] == 400:
+        resp = r1
+    elif r1["statusCode"] == 501:
+        resp = r2
+    print(f"{resp}")
     return resp

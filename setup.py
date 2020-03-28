@@ -7,14 +7,14 @@ with open("README.md") as fp:
 
 setuptools.setup(
     name="xray_lambda_profiler",
-    version="0.0.1",
+    version="0.0.2",
 
     description="xray_lambda_profiler",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
     author="Mystique",
-    github_repo_url="https://github.com/miztiik/elasticache-for-app-performance",
+    github_repo_url="https://github.com/miztiik/xray_lambda_profiler",
     github_profile="https://github.com/miztiik",
 
     package_dir={"": "xray_lambda_profiler"},

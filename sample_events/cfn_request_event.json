@@ -1,0 +1,18 @@
+{
+    "RequestType": "Delete",
+    "ServiceToken": "arn:aws:lambda:us-east-1:130319811891:function:locust-load-generator-sta-SingletonLambdamystique2-1VPYNKUJWCWS4",
+    "ResponseURL": "https://github.com/miztiik",
+    "StackId": "arn:aws:cloudformation:us-east-1:130319811891:stack/locust-load-generator-stack/f26d00c0-703c-11ea-8df0-0af77bd56d08",
+    "RequestId": "39231af4-3d2f-4305-b5a7-86135f418c4a",
+    "LogicalResourceId": "triggerLoadGeneratorTask5E9483EA",
+    "PhysicalResourceId": "TriggerFargateRunTaskToGenerateLocustLoad",
+    "ResourceType": "AWS::CloudFormation::CustomResource",
+    "ResourceProperties": {
+        "ServiceToken": "arn:aws:lambda:us-east-1:130319811891:function:locust-load-generator-sta-SingletonLambdamystique2-1VPYNKUJWCWS4",
+        "Message": [
+            {
+                "RUN_TASK_FN_ARN": "arn:aws:lambda:us-east-1:130319811891:function:create_fargate_run_task_fn"
+            }
+        ]
+    }
+}

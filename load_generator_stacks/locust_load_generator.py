@@ -33,7 +33,7 @@ class LocustLoadGeneratorStack(core.Stack):
         """
         super().__init__(scope, id, **kwargs)
 
-        # The code that defines your stack goes here
+        # The code that defines your stack goes here):
         locust_cluster = _ecs.Cluster(self,
                                       "locustCluster",
                                       vpc=vpc)
