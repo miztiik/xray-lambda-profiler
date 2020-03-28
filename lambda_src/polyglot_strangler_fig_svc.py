@@ -91,7 +91,7 @@ def _get_wiki_url(_url, q):
                   'pallavas', 'sangam_era', 'kural']
     if q:
         q = q.split('/')[-1]
-    else:
+    if not q:
         q = random.choice(HOT_TOPICS)
 
     try:

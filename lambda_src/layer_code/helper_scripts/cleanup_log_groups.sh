@@ -16,7 +16,7 @@ aws logs describe-log-groups --output table --profile $AWS_PROFILE --region $AWS
 
 for name in ${LOG_GROUPS}; do
     printf "Delete group ${name}... "
-    aws logs delete-log-group --log-group-name ${name} ---profile $AWS_PROFILE -region $AWS_REGION && echo OK || echo Fail
+    aws logs delete-log-group --log-group-name ${name} && echo OK || echo Fail
 done
 
 aws logs create-log-group --log-group-name /aws/lambda/${DELETE_THIS_LOG_GROUP} --profile $AWS_PROFILE --region $AWS_REGION && echo OK || echo Fail
