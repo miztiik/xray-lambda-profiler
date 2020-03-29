@@ -73,7 +73,7 @@ As the owner of the application, you would like to know what exactly is the issu
 
     - Go to the AWS CloudWatch Dasboard to check the difference metric about the app
 
-    - You can check out the annotations, metadata to gather further insights. _Some more stats [here]_
+    - You can check out the annotations, metadata to gather further insights. _Some more stats [here](performance_stats.md)_
 
 1. ## 🧹 CleanUp
 
