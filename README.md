@@ -71,7 +71,9 @@ As the owner of the application, you would like to know what exactly is the issu
     You should be able to notice graphs similar to this,
     ![Miztiik Serverless Lambda Profiler AWS XRay](images/miztiik-xray-lambda-profiler-results-00.png)
 
-    - You can check out the annotations, metadata to gather further insights.
+    - Go to the AWS CloudWatch Dasboard to check the difference metric about the app
+
+    - You can check out the annotations, metadata to gather further insights. _Some more stats [here]_
 
 1. ## 🧹 CleanUp
 
