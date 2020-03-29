@@ -16,7 +16,7 @@ As the owner of the application, you would like to know what exactly is the issu
 
     - AWS CLI pre-configured - [Get help here](https://youtu.be/TPyyfmQte0U)
     - AWS CDK Installed & Configured - [Get help here](https://www.youtube.com/watch?v=MKwxpszw0Rc)
-    - Python Packages, _Change the below commands to suit your OS_
+    - Python Packages, _Change the below commands to suit your OS, the following is written for amzn linux 2_
         - Python3 - `yum install -y python3`
         - Python Pip - `yum install -y python-pip`
         - Virtualenv - `pip3 install virtualenv`
