@@ -62,7 +62,7 @@ As the owner of the application, you would like to know what exactly is the issu
 
     The _Outputs_ section of the Clouformation template/service has the required information.
 
-    - Use the `hot_jobs` url in the browser few times(x10)
+    - Use the `PolyglotServiceApiUrl` in the browser few times(x10)
         - You can also launch `cdk deploy locust-load-testing-stack` to generate load on your API automatically
             - This will launch a Fargate Cluster running locust service (`x2`)
             - Locust is designed to answer: _How many concurrent users can my application support?_
