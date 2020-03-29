@@ -84,7 +84,9 @@ class XrayLambdaProfilerStack(core.Stack):
         # Enable AWS XRay Tracing at API GW
         polyglot_svc_api_stage_options = _apigw.StageOptions(
             stage_name="myst",
+            logging_level=_apigw.MethodLoggingLevel.INFO,
             data_trace_enabled=True,
+            metrics_enabled=True,
             tracing_enabled=True
         )
 
@@ -129,9 +131,10 @@ class XrayLambdaProfilerStack(core.Stack):
                                                                                    alarm_name="polyglot_svc_fn_error_alarm",
                                                                                    threshold=10,
                                                                                    evaluation_periods=2,
+                                                                                   comparison_operator=_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
                                                                                    period=core.Duration.minutes(
                                                                                        1),
-                                                                                   treat_missing_data=_cloudwatch.TreatMissingData.IGNORE
+                                                                                   treat_missing_data=_cloudwatch.TreatMissingData.NOT_BREACHING
                                                                                    )
 
         # SNS For Alerts for Polyglot Service
@@ -173,6 +176,8 @@ class XrayLambdaProfilerStack(core.Stack):
         )
 
         polyglot_svc_dashboard.add_widgets(
+
+            # Lambda Metrics
             # TODO: here monitor all lambda concurrency not just the working one. Limitation from CDK
             # Lambda now supports monitor single lambda concurrency, will change this after CDK support
             _cloudwatch.GraphWidget(title="Lambda-all-concurrent",
@@ -184,6 +189,14 @@ class XrayLambdaProfilerStack(core.Stack):
                                           polyglot_svc_fn.metric_throttles(statistic="Sum", period=core.Duration.minutes(1), color=_cloudwatch.Color.ORANGE)]),
             _cloudwatch.GraphWidget(title="Lambda-duration",
                                     left=[polyglot_svc_fn.metric_duration(statistic="Average", period=core.Duration.minutes(1))]),
+            # _cloudwatch.Row(_cloudwatch.TextWidget(markdown="# XRay Profiler KPI")),
+            # _cloudwatch.Row(_cloudwatch.Spacer()),
+            # DynamoDB Metrics
+            _cloudwatch.Row(_cloudwatch.GraphWidget(title="DynamoDB-Write-Capacity-Units",
+                                                    left=[queries_table.metric_consumed_write_capacity_units(statistic="Sum", period=core.Duration.minutes(1))]),
+                            _cloudwatch.GraphWidget(title="DynamoDB-Read-Capacity-Units",
+                                                    left=[queries_table.metric_consumed_read_capacity_units(statistic="Sum", period=core.Duration.minutes(1))])
+                            ),
         )
 
         ###########################################
@@ -199,5 +212,5 @@ class XrayLambdaProfilerStack(core.Stack):
         output_1 = core.CfnOutput(self,
                                   'PolyglotServiceApiUrl',
                                   value=f'{self.polyglot_svc_api_resource_01.url}',
-                                  description=f'Call the polyglot API'
+                                  description=f'Call the polyglot API, replace <query> with your search term'
                                   )

@@ -84,13 +84,15 @@ class wikiApiStack(core.Stack):
                                   )
 
         output_1 = core.CfnOutput(self,
+                                  "GetWikiUrl",
+                                  value=f"{self.wiki_url_path_00.url}/search term",
+                                  description=f"Get Wiki Url for given topic using API Gateway"
+                                  )
+
+        """
+        output_2 = core.CfnOutput(self,
                                   "APIGateway",
                                   value=f'{api_01.url}',
                                   description=f"This root domain for the API Gateway"
                                   )
-
-        output_2 = core.CfnOutput(self,
-                                  "GetWikiUrl",
-                                  value=f"{self.wiki_url_path_00.url}",
-                                  description=f"Get Wiki Url for given topic using API Gateway"
-                                  )
+        """

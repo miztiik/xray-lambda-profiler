@@ -89,10 +89,10 @@ class getWikiUrlStack(core.Stack):
         output_1 = core.CfnOutput(self,
                                   "ApplicationServerUrl",
                                   value=f'http://{self.web_app_server.instance_public_ip}/api/mystique',
-                                  description=f"This instance serves the wiki url for a given search keyword, http://<EC_IP_ADDRESS>/api/<SEARCH_TERM>"
+                                  description=f"Serve Wiki url for a given search keyword as a json, http://<EC2_IP_ADDRESS>/api/<SEARCH_TERM>"
                                   )
         output_2 = core.CfnOutput(self,
                                   "LegacyServerUrl",
                                   value=f'http://{self.web_app_server.instance_public_ip}/home/mystique',
-                                  description=f"This instance serves the wiki url for a given search keyword, http://<EC_IP_ADDRESS>/home/<SEARCH_TERM>"
+                                  description=f"Access Legacy App here, http://<EC2_IP_ADDRESS>/home/<SEARCH_TERM>"
                                   )

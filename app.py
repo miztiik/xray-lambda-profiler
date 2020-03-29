@@ -2,13 +2,11 @@
 
 from aws_cdk import core
 
-
-from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerStack
-from app_stacks.vpc_stack import VpcStack
 from app_stacks.get_wiki_url_stack import getWikiUrlStack
+from app_stacks.vpc_stack import VpcStack
 from app_stacks.wiki_api_stack import wikiApiStack
-
 from load_generator_stacks.locust_load_generator import LocustLoadGeneratorStack
+from xray_lambda_profiler.xray_lambda_profiler_stack import XrayLambdaProfilerStack
 
 app = core.App()
 # VPC Stack for hosting EC2 & Other resources
