@@ -104,6 +104,7 @@ As the owner of the application, you would like to know what exactly is the issu
 ### 📚 References
 
 1. [AWS XrayDocs](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python.html)
+
 1. [AWS Blog](https://aws.amazon.com/blogs/aws/aws-lambda-support-for-aws-x-ray/)
 1. [Xray Gotchas](https://read.acloud.guru/im-here-to-tell-you-the-truth-the-good-the-bad-and-the-ugly-of-aws-x-ray-and-lambda-f212b5f332e9)
 1. [AWS Xray Sample](https://docs.aws.amazon.com/xray/latest/devguide/scorekeep-lambda.html#scorekeep-lambda-worker)
@@ -111,6 +112,7 @@ As the owner of the application, you would like to know what exactly is the issu
 1. [AWS Xray Daemon Installation](https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ec2.html)
 1. [AWS Xray Daemon Permissions](https://docs.aws.amazon.com/xray/latest/devguide/security_iam_service-with-iam.html)
 1. [Open APIs](https://github.com/public-apis/public-apis)
+1. [Cfn Response](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-lambda-function-code-cfnresponsemodule.html)
 
 ### 🏷️ Metadata
 
