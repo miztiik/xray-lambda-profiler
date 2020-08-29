@@ -2,7 +2,7 @@ import random
 import os
 import sys
 
-from locust import HttpLocust, TaskSet, between, task
+from locust import HttpUser, TaskSet, between, task
 
 class xrayAppTasks(TaskSet):
     @task(1)
@@ -21,6 +21,6 @@ class xrayAppTasks(TaskSet):
         print(f"Running 'polyglot_svc'")
 
 
-class WebsiteUser(HttpLocust):
+class WebsiteUser(HttpUser):
     task_set = xrayAppTasks
     wait_time = between(1, 2)
