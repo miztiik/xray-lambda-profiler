@@ -40,7 +40,7 @@ locust_stack = LocustLoadGeneratorStack(
     url=xray_profiler_stack.polyglot_svc_api_resource_01.url,
     LOAD_PARAMS={
         "NO_OF_CLIENTS": "10",
-        "HATCH_RATE": "1",
+        "SPAWN_RATE": "1",
         "RUN_TIME": "10",
         "NO_OF_TASKS": "2"
     },
