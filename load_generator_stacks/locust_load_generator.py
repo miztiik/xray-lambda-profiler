@@ -42,16 +42,28 @@ class LocustLoadGeneratorStack(core.Stack):
         Load Testing Service in Fargate Cluster
         """
 
+        task_role = _iam.Role(
+            self,
+            "locustTaskRole",
+            assumed_by=_iam.ServicePrincipal("ecs-tasks.amazonaws.com")
+        )
+        task_role.add_managed_policy(
+            _iam.ManagedPolicy.from_aws_managed_policy_name(
+                managed_policy_name="AWSXRayDaemonWriteAccess")
+        )
+
         locust_task_def = _ecs.FargateTaskDefinition(self,
                                                      "locustAppTaskDef",
                                                      )
+
+    
 
         locust_container = locust_task_def.add_container("locustAppContainer",
                                                          environment={
                                                              "github_profile": "https://github.com/miztiik",
                                                              "LOCUSTFILE_PATH": "/locustfile.py",
                                                              "TARGET_URL": url,
-                                                             "LOCUST_OPTS": f"--clients={LOAD_PARAMS['NO_OF_CLIENTS']} --hatch-rate={LOAD_PARAMS['HATCH_RATE']} --run-time={LOAD_PARAMS['RUN_TIME']} --no-web --print-stats",
+                                                             "LOCUST_OPTS": f"--clients={LOAD_PARAMS['NO_OF_CLIENTS']} --hatch-rate={LOAD_PARAMS['SPAWN_RATE']} --run-time={LOAD_PARAMS['RUN_TIME']} --no-web --print-stats",
                                                              # --clients The number of concurrent Locust users.
                                                              # --hatch-rate The rate per second in which clients are spawned.
                                                              # --run-time The number of seconds to run locust. ( Ensure enough time to hatch all users )
@@ -61,7 +73,9 @@ class LocustLoadGeneratorStack(core.Stack):
                                                              "mystique/xray-lambda-profiler:latest"),
                                                          logging=_ecs.LogDrivers.aws_logs(
                                                              stream_prefix="Mystique")
+
                                                          )
+
 
         locust_container.add_port_mappings(
             _ecs.PortMapping(container_port=80, protocol=_ecs.Protocol.TCP)

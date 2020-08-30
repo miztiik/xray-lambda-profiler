@@ -35,7 +35,6 @@ def set_logging(lv=global_args.LOG_LEVEL):
     '''
     Helper to enable logging
     '''
-    logging.basicConfig(level=lv)
     LOGGER = logging.getLogger()
     LOGGER.setLevel(lv)
     return LOGGER

@@ -11,7 +11,7 @@ from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
 
 # Create and configure the Flask application
 application = Flask(__name__, instance_relative_config=True)
-xray_recorder.configure(service='api_on_ec2', sampling=False)
+xray_recorder.configure(service='legacy_app_on_ec2', sampling=False)
 XRayMiddleware(application, xray_recorder)
 
 
